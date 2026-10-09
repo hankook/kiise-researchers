@@ -1,0 +1,49 @@
+# PR 에 올라온 프로필 데이터를 자동으로 검증합니다.
+# 담당자가 머지하기 전에 여기서 먼저 걸러집니다.
+name: 프로필 데이터 검증
+
+on:
+  pull_request:
+    paths:
+      - "profiles-web/**"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: JSON 문법 검사
+        working-directory: profiles-web
+        run: |
+          python3 -c "import json; json.load(open('data/researchers.json', encoding='utf-8'))"
+          python3 -c "import json; json.load(open('data/societies.json', encoding='utf-8'))"
+
+      - name: 데이터 무결성 검사
+        working-directory: profiles-web
+        run: python3 tools/build.py check --strict
+
+      - name: 변경된 프로필 요약
+        if: always()
+        working-directory: profiles-web
+        run: |
+          echo "### 현재 등록 인원" >> $GITHUB_STEP_SUMMARY
+          python3 - <<'PY' >> $GITHUB_STEP_SUMMARY
+          import json
+          d = json.load(open('data/researchers.json', encoding='utf-8'))
+          vis = [r for r in d if r.get('visible', True) is not False]
+          print(f"- 전체 {len(d)}명 (공개 {len(vis)}명 / 비공개 {len(d)-len(vis)}명)")
+          print("")
+          print("| 성명 | 소속 | 직위 | 키워드 | 공개 |")
+          print("|---|---|---|---|---|")
+          for r in sorted(d, key=lambda x: x.get('name', '')):
+              print("| {} | {} {} | {} | {}개 | {} |".format(
+                  r.get('name', ''), r.get('affiliation', ''), r.get('department', ''),
+                  r.get('position', ''), len(r.get('keywords', [])),
+                  'O' if r.get('visible', True) is not False else 'X'))
+          PY

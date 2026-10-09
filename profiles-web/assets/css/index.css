@@ -1,0 +1,208 @@
+/* ============================ 목록(검색) 페이지 ============================ */
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+
+/* ----------------------------------------------------------------- 히어로 */
+.hero {
+  background: linear-gradient(160deg, var(--navy) 0%, #052b74 55%, #0d3a8f 100%);
+  color: #fff;
+  padding: 34px 0 30px;
+}
+.hero h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+}
+.hero p {
+  margin: 0 0 20px;
+  color: #c2cfe6;
+  font-size: 14px;
+  max-width: 60ch;
+}
+
+/* 검색창 */
+.searchbar { position: relative; max-width: 620px; }
+.searchbar input {
+  width: 100%;
+  padding: 13px 44px 13px 42px;
+  border: 0;
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 12, 40, .22);
+}
+.searchbar input:focus { outline: 3px solid rgba(255,255,255,.45); outline-offset: 1px; }
+.searchbar__icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: var(--ink-3); pointer-events: none;
+}
+.searchbar__clear {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  border: 0; background: transparent; color: var(--ink-3);
+  font-size: 18px; line-height: 1; padding: 6px 8px; cursor: pointer; border-radius: 50%;
+}
+.searchbar__clear:hover { background: var(--line-soft); color: var(--ink); }
+.searchbar__clear[hidden] { display: none; }
+
+/* --------------------------------------------------------------- 필터 영역 */
+.filters {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.filters__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filters__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: .02em;
+  flex: 0 0 auto;
+}
+.filters select {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+/* 키워드 토글 칩 */
+.kwfilter { display: flex; flex-wrap: wrap; gap: 6px; }
+/* 접었을 때 정확히 2줄만 보이도록 칩 높이(32px)+간격(6px) 기준으로 계산 */
+.kwfilter.is-collapsed { max-height: 70px; overflow: hidden; }
+/* 펼쳤을 때 화면을 다 덮지 않도록 높이를 제한하고 내부에서 스크롤 */
+.kwfilter:not(.is-collapsed) { max-height: 40vh; overflow-y: auto; padding-right: 2px; }
+.kwchip {
+  height: 32px;
+  line-height: 20px;
+  padding: 5px 11px;
+  border: 1px solid var(--navy-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .12s;
+}
+.kwchip:hover { background: var(--navy-soft); }
+.kwchip[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+.kwchip small { opacity: .65; font-weight: 500; margin-left: 4px; }
+
+.filters__meta {
+  margin-top: 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.filters__meta strong { color: var(--navy); font-size: 15px; }
+.filters__count { display: inline-flex; gap: 6px; align-items: baseline; }
+.linkbtn {
+  border: 0; background: none; padding: 0;
+  color: var(--accent); font-size: 13px; cursor: pointer; text-decoration: underline;
+}
+
+/* --------------------------------------------------------------- 카드 목록 */
+.results { padding: 24px 0 8px; }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: transform .12s, box-shadow .12s, border-color .12s;
+  border-top: 3px solid var(--navy);
+}
+.card:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--navy-line);
+  border-top-color: var(--navy);
+}
+.card__top { display: flex; gap: 14px; align-items: flex-start; }
+.card__photo {
+  width: 66px; height: 84px; flex: 0 0 66px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--navy-soft);
+  border: 1px solid var(--line);
+}
+.card__photo--ph {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--navy); font-size: 24px; font-weight: 800; letter-spacing: -.04em;
+}
+.card__name { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.02em; color: var(--navy); }
+.card__name span { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 6px; }
+.card__affil { margin: 3px 0 0; font-size: 13px; color: var(--ink-2); }
+.card__pos { margin: 1px 0 0; font-size: 12.5px; color: var(--ink-3); }
+.card__soc {
+  margin: 5px 0 0;
+  font-size: 11.5px;
+  color: var(--navy-mid);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card__kw { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+.card__desc {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card mark { background: #fff2a8; color: inherit; padding: 0 1px; border-radius: 2px; }
+
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--ink-3);
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+.empty strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 6px; }
+
+/* 모바일 */
+@media (max-width: 640px) {
+  .hero { padding: 24px 0 22px; }
+  .hero h1 { font-size: 21px; }
+  .cards { grid-template-columns: 1fr; }
+  .filters { padding: 12px 0; position: static; }   /* 모바일에서는 고정하지 않음 */
+  /* 결과 수는 한 줄, 소속/정렬 선택은 그 아래 나란히 */
+  .filters__meta { gap: 8px; }
+  .filters__count { flex: 1 0 100%; }
+  .filters select { flex: 1 1 0; min-width: 0; }
+  .filters__meta .linkbtn { flex: 0 0 auto; }
+}

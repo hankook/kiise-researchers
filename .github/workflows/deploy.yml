@@ -1,0 +1,44 @@
+# main 브랜치에 머지되면 GitHub Pages 로 자동 배포합니다.
+# (= PR 머지가 곧 '게시 승인')
+name: GitHub Pages 배포
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 배포 전 마지막 검증 — 문제가 있으면 배포하지 않습니다.
+      - name: 데이터 검증
+        working-directory: profiles-web
+        run: python3 tools/build.py check --strict
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: profiles-web      # 정적 사이트라 별도 빌드가 필요 없습니다.
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

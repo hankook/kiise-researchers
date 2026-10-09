@@ -1,0 +1,103 @@
+/* 공통 데이터 로더 & 유틸 (index / profile 공용) */
+(function () {
+  "use strict";
+  var KIISE = (window.KIISE = window.KIISE || {});
+
+  /* -------------------------------------------------- 데이터 로드
+     1) http(s) 로 서빙되는 경우: data/researchers.json 을 fetch
+     2) file:// 로 직접 연 경우 : data/researchers.js 가 미리 채워 둔
+        window.RESEARCHERS 를 사용 (브라우저 보안정책상 fetch 불가)        */
+  KIISE.load = function () {
+    return fetch("data/researchers.json", { cache: "no-cache" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .catch(function () {
+        if (Array.isArray(window.RESEARCHERS)) return window.RESEARCHERS;
+        throw new Error("프로필 데이터를 불러오지 못했습니다.");
+      })
+      .then(function (list) {
+        return (list || [])
+          .filter(function (r) { return r && r.visible !== false; })  /* 비공개 처리된 프로필 제외 */
+          .map(KIISE.normalize);
+      });
+  };
+
+  /* -------------------------------------------------- 레코드 정규화 */
+  KIISE.normalize = function (r) {
+    var o = Object.assign({}, r);
+    o.keywords = o.keywords || [];
+    o.societies = o.societies || [];        /* 정보과학회 내 소사이어티·연구회 */
+    o.conferences = o.conferences || [];    /* 주로 참석하는 학회 */
+    o.career = o.career || [];              /* 주요 경력 */
+    o.achievements = o.achievements || [];  /* 대표 논문 및 수행과제 */
+    o.goals = o.goals || [];
+    o.collaboration = o.collaboration || [];
+    o.message = o.message || "";            /* 한마디 */
+    o.links = o.links || [];
+    o.research = o.research || {};
+    o.research.body = o.research.body || [];
+    o.research.figures = o.research.figures || [];
+    o.affilFull = [o.affiliation, o.department].filter(Boolean).join(" ");
+    o.posLine = [o.affilFull, o.position].filter(Boolean).join(" ");
+    o.searchText = KIISE.fold(
+      [
+        o.name, o.nameEn, o.affiliation, o.department, o.position, o.degree,
+        o.keywords.join(" "), o.societies.join(" "), o.conferences.join(" "),
+        o.message, o.career.join(" "), o.achievements.join(" "), o.goals.join(" "),
+        o.research.body.join(" "), o.collaboration.join(" ")
+      ].join(" ")
+    );
+    o.chosung = KIISE.chosung(String(o.name || "") + " " + (o.keywords || []).join(" "));
+    return o;
+  };
+
+  /* -------------------------------------------------- 문자열 유틸 */
+  KIISE.fold = function (s) {
+    return String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+  };
+
+  var CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+  /* 한글 문자열의 초성 추출 — "김정보" → "ㄱㅈㅂ" (초성 검색 지원) */
+  KIISE.chosung = function (s) {
+    var out = "";
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c >= 0xac00 && c <= 0xd7a3) out += CHO[Math.floor((c - 0xac00) / 588)];
+      else out += s[i].toLowerCase();
+    }
+    return out;
+  };
+  KIISE.isChosungQuery = function (q) { return /^[ㄱ-ㅎ\s]+$/.test(q); };
+
+  KIISE.escape = function (s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (m) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+    });
+  };
+
+  /* 검색어 하이라이트 (이미 escape 된 문자열에 적용) */
+  KIISE.highlight = function (escaped, terms) {
+    if (!terms || !terms.length) return escaped;
+    var pat = terms
+      .filter(function (t) { return t.length > 0; })
+      .map(function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); })
+      .join("|");
+    if (!pat) return escaped;
+    return escaped.replace(new RegExp("(" + pat + ")", "gi"), "<mark>$1</mark>");
+  };
+
+  /* 날짜 표기: 2026-09-01 → 2026. 09. 01. */
+  KIISE.fmtDate = function (s) {
+    if (!s) return "";
+    var m = String(s).match(/^(\d{4})[-.\/]?(\d{2})?[-.\/]?(\d{2})?/);
+    if (!m) return s;
+    return [m[1], m[2], m[3]].filter(Boolean).join(". ") + ".";
+  };
+
+  /* 사진이 없을 때 쓰는 이니셜 (성 한 글자) */
+  KIISE.initial = function (name) {
+    return String(name || "?").trim().charAt(0);
+  };
+})();

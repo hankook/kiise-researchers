@@ -1,0 +1,177 @@
+/* ==========================================================================
+   한국정보과학회 신진연구자 프로필 브로셔 — 공통 스타일
+   기준 색: KIISE 네이비 #002060 (원본 PPT/PDF 템플릿과 동일)
+   ========================================================================== */
+
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+
+:root {
+  /* 브랜드 */
+  --navy:        #002060;   /* 원본 템플릿 기본 색 (RGB 0, 32, 96) */
+  --navy-deep:   #001640;
+  --navy-mid:    #1c3d77;
+  --navy-soft:   #e8edf6;
+  --navy-line:   #c3cfe4;
+  --accent:      #2f6fd0;
+
+  /* 중립 */
+  --ink:         #1a1c20;
+  --ink-2:       #454b55;
+  --ink-3:       #6b7280;
+  --line:        #dfe3ea;
+  --line-soft:   #eef1f5;
+  --bg:          #f4f6f9;
+  --surface:     #ffffff;
+
+  /* 타이포 */
+  --font-sans: "KoPub Dotum", "KoPubWorld Dotum", "KoPubWorld Dotum_Pro",
+               Pretendard, "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+
+  /* 레이아웃 */
+  --maxw: 1180px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 8px 24px rgba(16, 24, 40, .06);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .08);
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--bg);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { max-width: 100%; }
+
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+button { font: inherit; color: inherit; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ----------------------------------------------------------- 사이트 헤더 */
+.site-header {
+  background: var(--navy);
+  color: #fff;
+  border-bottom: 3px solid var(--navy-deep);
+}
+.site-header__inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.site-header__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.3;
+}
+.site-header__title a { color: #fff; text-decoration: none; }
+.site-header__org {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #b9c6de;
+  letter-spacing: .02em;
+}
+.site-header__nav {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.site-header__nav a {
+  color: #d5deee;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+.site-header__nav a:hover { background: rgba(255,255,255,.12); color: #fff; text-decoration: none; }
+
+@media (max-width: 560px) {
+  .site-header__inner { padding: 11px 14px; gap: 8px; }
+  .site-header__title { font-size: 15.5px; }
+  .site-header__nav { margin-left: auto; gap: 2px; }
+  .site-header__nav a { font-size: 12px; padding: 4px 7px; }
+}
+
+/* ----------------------------------------------------------- 공통 버튼 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .12s, background .12s, color .12s;
+}
+.btn:hover { border-color: var(--navy-mid); color: var(--navy); text-decoration: none; }
+.btn--primary {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+.btn--primary:hover { background: var(--navy-deep); border-color: var(--navy-deep); color: #fff; }
+.btn--ghost { background: transparent; }
+
+/* ----------------------------------------------------------- 푸터 */
+.site-footer {
+  margin-top: 48px;
+  padding: 24px 20px 40px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+.site-footer__inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+/* ----------------------------------------------------------- 키워드 칩 */
+.kw {
+  display: inline-block;
+  padding: 3px 9px;
+  border: 1px solid var(--navy-line);
+  border-radius: 999px;
+  background: var(--navy-soft);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.kw--muted { background: #f3f5f9; border-color: var(--line); color: var(--ink-2); }
+
+/* 인쇄 전용 요소는 화면에서 숨김 */
+.print-only { display: none; }

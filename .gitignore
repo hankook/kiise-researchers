@@ -1,0 +1,13 @@
+# 구글 폼 응답 원본 — 공개 저장소에 올리지 않습니다.
+*.csv
+*.bak
+profiles-web/data/*.bak
+
+# OS / 편집기
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 로컬 미리보기 설정
+.claude/

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>신진연구자 프로필 브로셔 — 한국정보과학회</title>
+<meta name="description" content="한국정보과학회 신진연구자 프로필 브로셔. 연구 키워드와 소속으로 검색하고, 연구자별 프로필을 확인할 수 있습니다.">
+<meta property="og:title" content="신진연구자 프로필 브로셔 — 한국정보과학회">
+<meta property="og:description" content="연구 키워드로 신진연구자를 찾고 공동연구 파트너를 연결합니다.">
+<link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="assets/css/index.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <h1 class="site-header__title">
+      <a href="index.html">신진연구자 프로필 브로셔
+        <span class="site-header__org">한국정보과학회 미디어홍보위원회</span></a>
+    </h1>
+    <nav class="site-header__nav">
+      <a href="submit.html">프로필 등록 안내</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>연구 키워드로 신진연구자를 찾아보세요</h1>
+    <p>이름 · 소속 · 연구 키워드 · 연구내용 전체에서 검색합니다. 초성 검색(예: <b>ㄱㅈㅂ</b>)도 지원합니다.</p>
+    <div class="searchbar">
+      <svg class="searchbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+      <label class="sr-only" for="q">연구자 검색</label>
+      <input id="q" type="search" autocomplete="off" placeholder="예: 기계학습, 보안, 김정보, NeurIPS, 가상대학교">
+      <button id="q-clear" class="searchbar__clear" type="button" aria-label="검색어 지우기" hidden>&times;</button>
+    </div>
+  </div>
+</section>
+
+<section class="filters">
+  <div class="wrap">
+    <div class="filters__row">
+      <span class="filters__label">연구 키워드</span>
+      <div id="kwfilter" class="kwfilter"></div>
+      <button id="kwmore" class="linkbtn" type="button" hidden>키워드 모두 보기</button>
+    </div>
+    <div class="filters__meta">
+      <span class="filters__count">
+        <span id="count"><strong>0</strong>명</span>
+        <span>/ 전체 <span id="total">0</span>명</span>
+      </span>
+      <label class="sr-only" for="affil">소속 필터</label>
+      <select id="affil"><option value="">소속 전체</option></select>
+      <label class="sr-only" for="soc">소사이어티 · 연구회 필터</label>
+      <select id="soc"><option value="">소사이어티 · 연구회 전체</option></select>
+      <label class="sr-only" for="sort">정렬</label>
+      <select id="sort">
+        <option value="name">이름순</option>
+        <option value="affil">소속순</option>
+        <option value="updated">최근 업데이트순</option>
+      </select>
+      <button id="reset" class="linkbtn" type="button" hidden>필터 초기화</button>
+    </div>
+  </div>
+</section>
+
+<main class="results">
+  <div class="wrap">
+    <div id="cards" class="cards" aria-live="polite"></div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <span>© 한국정보과학회(KIISE) 미디어홍보위원회 — 신진연구자 커뮤니티 활성화 사업</span>
+    <span>프로필 등록·수정 문의: <a href="submit.html">등록 안내</a></span>
+  </div>
+</footer>
+
+<script src="data/researchers.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/index.js"></script>
+</body>
+</html>

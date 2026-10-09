@@ -1,0 +1,339 @@
+/* ======================= 개인 프로필 페이지 (화면 + 인쇄) =======================
+   화면  : 모바일 1단 / PC 2단(좌측 고정 프로필 + 우측 본문)
+   인쇄  : A4 세로 1단 — 원본 PPT 템플릿 레이아웃을 그대로 재현
+   ========================================================================== */
+
+.pf-wrap { max-width: 1180px; margin: 0 auto; padding: 20px; }
+
+/* 상단 이동/동작 줄 */
+.pf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.pf-toolbar__spacer { margin-left: auto; }
+.pf-backlink { font-size: 13px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; }
+.pf-backlink:hover { color: var(--navy); }
+
+/* 전체 컨테이너 */
+.profile {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+}
+.pf-aside { flex: 0 0 330px; position: sticky; top: 20px; }
+.pf-main  { flex: 1 1 auto; min-width: 0; }
+
+/* --------------------------------------------------------------- 헤더 카드 */
+.pf-head {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.pf-head__bar {
+  background: var(--navy);
+  color: #fff;
+  padding: 7px 14px;
+  font-size: 11.5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.pf-head__brand { display: none; font-weight: 700; letter-spacing: .01em; color: #cbd7ea; }
+.pf-updated { color: #cbd7ea; }
+.pf-head__body { padding: 18px; }
+
+.pf-photo,
+.pf-photo--ph {
+  display: block;
+  width: 132px;
+  height: 168px;
+  margin: 0 auto 14px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--navy-soft);
+}
+.pf-photo--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -.05em;
+}
+
+.pf-nameline { text-align: center; border-bottom: 1px solid var(--line-soft); padding-bottom: 12px; margin-bottom: 12px; }
+.pf-name {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: var(--navy);
+}
+.pf-name-en { display: block; font-size: 12.5px; font-weight: 500; color: var(--ink-3); margin-top: 2px; letter-spacing: 0; }
+.pf-pos { margin: 8px 0 0; font-size: 14px; color: var(--ink-2); font-weight: 600; }
+
+/* 인적 사항 목록 */
+.pf-facts { font-size: 13px; color: var(--ink-2); }
+.pf-facts li { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--line-soft); }
+.pf-facts li:last-child { border-bottom: 0; }
+.pf-facts dt, .pf-facts .k {
+  flex: 0 0 78px;
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 12px;
+  padding-top: 1px;
+}
+.pf-facts .v { flex: 1 1 auto; min-width: 0; }
+
+.pf-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.pf-links a {
+  font-size: 12px; font-weight: 600;
+  padding: 5px 10px;
+  border: 1px solid var(--navy-line);
+  border-radius: var(--radius-sm);
+  background: var(--navy-soft);
+  color: var(--navy);
+}
+.pf-links a:hover { background: var(--navy); color: #fff; text-decoration: none; }
+
+/* 한마디 */
+.pf-quote {
+  margin: 14px 0 0;
+  padding: 10px 12px 10px 14px;
+  border-left: 3px solid var(--navy);
+  background: var(--navy-soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--navy-deep);
+}
+.pf-quote::before { content: "\201C"; margin-right: 2px; font-weight: 700; }
+.pf-quote::after  { content: "\201D"; margin-left: 2px; font-weight: 700; }
+
+/* 라벨 + 내용 한 줄 (학회 활동 섹션) */
+.pf-row { display: flex; gap: 10px; align-items: baseline; }
+.pf-row + .pf-row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line-soft); }
+.pf-row__label {
+  flex: 0 0 104px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.5;
+}
+.pf-row__body { flex: 1 1 auto; min-width: 0; }
+
+/* ------------------------------------------------------------------ 섹션 */
+.pf-sec { margin-bottom: 18px; }
+.pf-sec__title {
+  display: inline-block;
+  margin: 0;
+  padding: 6px 22px 6px 16px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  border-radius: 3px 3px 0 0;
+}
+.pf-sec__body {
+  background: var(--surface);
+  border: 1px solid var(--navy-line);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm);
+  padding: 16px 18px;
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.7;
+}
+.pf-sec__body > p { margin: 0 0 10px; }
+.pf-sec__body > p:last-child { margin-bottom: 0; }
+
+/* 불릿 목록 */
+.pf-list li {
+  position: relative;
+  padding-left: 14px;
+  margin-bottom: 7px;
+}
+.pf-list li:last-child { margin-bottom: 0; }
+.pf-list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: .62em;
+  width: 5px; height: 5px;
+  background: var(--navy);
+}
+.pf-list li b, .pf-list li strong { color: var(--navy-deep); }
+
+/* 키워드 섹션 (사이드바 안) */
+.pf-kws { display: flex; flex-wrap: wrap; gap: 6px; }
+.pf-kws a.kw:hover { background: var(--navy); color: #fff; text-decoration: none; }
+
+/* 연구내용 그림 */
+.pf-figs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.pf-fig { margin: 0; }
+.pf-fig img {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+.pf-fig figcaption {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--ink-3);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* 없는 항목 안내 */
+.pf-none { color: var(--ink-3); font-size: 13px; }
+
+/* ------------------------------------------------------------- 반응형(화면) */
+@media (max-width: 960px) {
+  .profile { display: block; }
+  .pf-aside { position: static; width: auto; margin-bottom: 18px; }
+
+  /* 사진 + 이름을 한 줄에 세로 중앙 정렬하고, 인적사항은 그 아래 전체 폭으로 */
+  .pf-head__body { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+  .pf-photo, .pf-photo--ph { width: 116px; height: 148px; margin: 0; flex: 0 0 116px; }
+  .pf-idblock { flex: 1 1 200px; min-width: 0; }
+  .pf-nameline { text-align: left; border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+  .pf-head__facts {
+    flex: 1 1 100%;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 12px;
+    margin-top: 2px;
+  }
+  .pf-kwsec { margin-top: 14px; }
+}
+@media (max-width: 768px) {
+  #toolbar-extra { display: none; }          /* 이전/다음 이동은 좁은 화면에서 숨김 */
+  .pf-toolbar .btn { padding: 7px 11px; font-size: 12.5px; }
+}
+
+@media (max-width: 560px) {
+  .pf-wrap { padding: 14px; }
+  .pf-head__body { gap: 8px 14px; padding: 14px; }
+  .pf-photo, .pf-photo--ph { width: 92px; height: 118px; flex-basis: 92px; }
+  .pf-idblock { flex-basis: 150px; }
+  .pf-photo--ph { font-size: 30px; }
+  .pf-name { font-size: 21px; }
+  .pf-sec__body { padding: 13px 14px; font-size: 13.5px; }
+  .pf-facts dt, .pf-facts .k { flex-basis: 66px; }
+  .pf-row { display: block; }
+  .pf-row__label { display: block; margin-bottom: 6px; }
+}
+
+/* ========================================================================== */
+/*  인쇄 / PDF (A4 세로)                                                       */
+/* ========================================================================== */
+@media print {
+  @page { size: A4 portrait; margin: 11mm 11mm 12mm; }
+
+  html, body {
+    background: #fff !important;
+    font-size: 8.4pt;
+    line-height: 1.5;
+  }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  .site-header, .site-footer, .pf-toolbar, .pf-links, .no-print { display: none !important; }
+  .print-only { display: block !important; }
+
+  .pf-wrap { max-width: none; padding: 0; margin: 0; }
+
+  /* 1단 구성 */
+  .profile { display: block; }
+  .pf-aside { position: static; width: auto; flex: none; margin: 0 0 2.1mm; }
+  .pf-main { width: auto; }
+
+  /* 헤더 — 템플릿과 동일하게 사진 + 인적사항 가로 배치 */
+  .pf-head { border: 1px solid var(--navy); border-radius: 0; box-shadow: none; }
+  .pf-head__bar { padding: 2mm 3mm; font-size: 7.4pt; background: var(--navy) !important; color: #fff !important; }
+  .pf-head__brand { display: inline !important; }
+  .pf-head__bar .pf-head__brand, .pf-head__bar .pf-updated { color: #dbe4f2 !important; }
+  .pf-head__body {
+    display: grid;
+    grid-template-columns: 26mm 1fr;
+    gap: 3.5mm;
+    padding: 2.5mm;
+    align-items: start;
+  }
+  .pf-photo, .pf-photo--ph { width: 26mm; height: 33mm; margin: 0; border-radius: 0; font-size: 16pt;
+    grid-row: 1 / span 2; }
+  .pf-nameline { text-align: left; border-bottom: 0; padding: 0 0 1.5mm; margin: 0 0 1.5mm; border-bottom: .3mm solid var(--navy-line); }
+  .pf-name { font-size: 16pt; }
+  .pf-name-en { font-size: 8pt; }
+  .pf-pos { font-size: 9.5pt; margin-top: 1mm; }
+  /* A4 폭(약 794px)에서는 위의 모바일 규칙도 함께 적용되므로 여기서 되돌린다 */
+  .pf-head__facts { grid-column: 2; grid-row: 2; border-top: 0; padding-top: 0; margin-top: 0; }
+  .pf-idblock { flex: none; }
+  .pf-facts { font-size: 8pt; }
+  .pf-facts li { padding: .45mm 0; border-bottom: 0; }
+  .pf-facts dt, .pf-facts .k { flex-basis: 22mm; font-size: 7.8pt; }
+
+  /* 섹션 */
+  .pf-sec { margin-bottom: 2.1mm; break-inside: avoid; page-break-inside: avoid; }
+  .pf-sec__title {
+    padding: 1mm 8mm 1mm 4mm;
+    font-size: 8.8pt;
+    border-radius: 0;
+    background: var(--navy) !important;
+    color: #fff !important;
+  }
+  .pf-sec__body {
+    border: .3mm solid #9aa9c4;
+    border-radius: 0;
+    padding: 1.8mm 2.8mm;
+    font-size: 8.3pt;
+    line-height: 1.5;
+  }
+  .pf-list li { margin-bottom: 1mm; padding-left: 3mm; }
+  .pf-list li::before { width: 1.2mm; height: 1.2mm; top: .55em; }
+
+  .pf-quote {
+    margin: 1.2mm 0 0;
+    padding: 1.2mm 2mm;
+    border-left: .6mm solid var(--navy);
+    border-radius: 0;
+    background: var(--navy-soft) !important;
+    font-size: 7.8pt;
+    line-height: 1.45;
+  }
+  .pf-row { gap: 2mm; }
+  .pf-row + .pf-row { margin-top: 1.5mm; padding-top: 1.5mm; }
+  .pf-row__label { flex-basis: 24mm; font-size: 7.4pt; }
+
+  .kw { font-size: 7.6pt; padding: .4mm 2mm; background: var(--navy-soft) !important; color: var(--navy) !important; border-color: var(--navy-line) !important; }
+  .pf-kws { gap: 1.2mm; }
+
+  .pf-figs { grid-template-columns: repeat(auto-fit, minmax(45mm, 1fr)); gap: 3mm; margin-top: 2.5mm; }
+  .pf-fig img { max-height: 60mm; object-fit: contain; }
+  .pf-fig figcaption { font-size: 7.4pt; margin-top: 1mm; }
+
+  a { color: var(--navy) !important; text-decoration: none !important; }
+
+  /* 인쇄용 꼬리말 */
+  .pf-printfoot {
+    display: flex !important;
+    margin-top: 3mm;
+    padding-top: 1.5mm;
+    border-top: .3mm solid var(--navy-line);
+    font-size: 7pt;
+    color: #5b6478;
+    display: flex;
+    justify-content: space-between;
+  }
+}
