@@ -1,6 +1,7 @@
-# main 브랜치에 머지되면 GitHub Pages 로 자동 배포합니다.
-# (= PR 머지가 곧 '게시 승인')
-name: GitHub Pages 배포
+# main 이 바뀌면 inbox 반영 → 동기화·검증 → (바뀐 것이 있으면 커밋) → GitHub Pages 배포.
+# 담당자가 GitHub 웹에서 inbox/ 에 등록 양식·사진을 올리는 것만으로 프로필이 게시됩니다.
+# inbox 에 문제가 있으면 아무것도 바꾸지 않고 실패하며, 이유는 실행 화면의 Summary 에 나옵니다.
+name: 프로필 반영 및 배포
 
 on:
   push:
@@ -8,13 +9,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write     # inbox 반영 결과를 main 에 커밋
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false   # 반영 도중 끊기지 않도록 차례대로 실행
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
 
 jobs:
   deploy:
@@ -24,15 +28,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main     # 기다리는 동안 앞선 실행이 커밋했을 수 있으므로 지금의 main 을 받음
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      # 배포 전 마지막 검증 — 문제가 있으면 배포하지 않습니다.
-      - name: 데이터 검증
+      - name: 사진 처리 도구 설치
+        run: pip install --quiet pillow pillow-heif
+
+      - name: inbox 반영 (등록 양식 · 사진 · 요청)
         working-directory: profiles-web
-        run: python3 tools/build.py check --strict
+        run: python3 tools/build.py ingest ../inbox --message-file "$RUNNER_TEMP/commit-message.txt"
+
+      - name: 동기화 · 검증
+        working-directory: profiles-web
+        run: |
+          python3 tools/build.py sync
+          python3 tools/build.py check --strict
+
+      - name: 반영 결과 커밋
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "커밋할 변경 없음"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -f "$RUNNER_TEMP/commit-message.txt" ]; then
+            git commit -q -F "$RUNNER_TEMP/commit-message.txt"
+          else
+            git commit -q -m "데이터 동기화 (researchers.js · 등록 양식)"
+          fi
+          git pull -q --rebase origin main    # 그 사이 올라온 파일이 있으면 그 위에 얹음 (다음 실행이 처리)
+          git push -q origin HEAD:main
 
       - uses: actions/configure-pages@v5
 

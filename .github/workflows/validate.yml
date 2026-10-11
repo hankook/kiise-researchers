@@ -1,12 +1,16 @@
-# PR 에 올라온 프로필 데이터를 자동으로 검증합니다.
-# 담당자가 머지하기 전에 여기서 먼저 걸러집니다.
+# Pull Request 로 올라온 변경을 머지 전에 검증합니다. (코드 수정, 또는 inbox 업로드를 PR 로 올린 경우)
+# main 에 바로 올린 파일은 deploy.yml 이 같은 검증을 거친 뒤 반영합니다.
 name: 프로필 데이터 검증
 
 on:
   pull_request:
     paths:
       - "profiles-web/**"
+      - "inbox/**"
   workflow_dispatch:
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
 
 jobs:
   validate:
@@ -23,6 +27,13 @@ jobs:
         run: |
           python3 -c "import json; json.load(open('data/researchers.json', encoding='utf-8'))"
           python3 -c "import json; json.load(open('data/societies.json', encoding='utf-8'))"
+
+      - name: 사진 처리 도구 설치
+        run: pip install --quiet pillow pillow-heif
+
+      - name: inbox 검사 (반영하지 않고 확인만)
+        working-directory: profiles-web
+        run: python3 tools/build.py ingest ../inbox --dry-run
 
       - name: 데이터 무결성 검사
         working-directory: profiles-web

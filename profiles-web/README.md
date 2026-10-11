@@ -8,7 +8,7 @@
 * **인쇄/PDF** — 브라우저의 `인쇄 / PDF 저장` 버튼 한 번으로 기존 브로셔와 동일한 **A4 세로 1면** PDF 생성
 * **검색** — 이름·소속·키워드·학회·연구내용 전문 검색, 초성 검색(`ㄱㅈㅂ`), 키워드 다중 필터,
   소사이어티·연구회 필터
-* **운영** — 서버/DB 없이 GitHub PR 승인 → Pages 자동 배포 (→ 저장소 루트의 `OPERATIONS.md`)
+* **운영** — 서버/DB 없이 메일로 받은 양식을 `inbox/` 에 올리면 Actions 가 반영 → Pages 배포 (→ 저장소 루트의 `OPERATIONS.md`)
 
 ---
 
@@ -18,7 +18,7 @@
 profiles-web/
 ├── index.html              검색 가능한 연구자 목록 (브로셔 표지 역할)
 ├── profile.html            연구자 1인 프로필 (?id=연구자ID)
-├── submit.html             프로필 등록 안내 / 구글 폼 문항 정의
+├── submit.html             프로필 등록 안내 / 양식 항목 설명
 ├── data/
 │   ├── researchers.json    ★ 원본 데이터 (여기만 고치면 됩니다)
 │   ├── societies.json      소사이어티·연구회 공식 목록 (표기 검증용)
@@ -26,7 +26,10 @@ profiles-web/
 ├── photos/                 연구자 사진 (세로 3:4 권장)
 ├── figures/                연구내용 그림
 ├── assets/css, assets/js   디자인·동작
-└── tools/build.py          구글 폼 CSV → JSON 변환, 데이터 점검
+├── assets/profile-form.xlsx  자동 생성 — 교수님용 등록 양식 (submit.html 에서 내려받기)
+└── tools/
+    ├── build.py            inbox 반영(ingest), 동기화(sync), 점검(check)
+    └── xlsx.py             xlsx 읽기·쓰기 (표준 라이브러리만)
 ```
 
 ## 2. 실행 방법
@@ -47,21 +50,31 @@ GitHub Pages, 학회 웹서버 등 **정적 호스팅 어디에나** 폴더째 �
 
 ## 3. 연구자 추가·수정하기
 
-### 방법 A — 구글 폼 응답 CSV 사용 (권장)
-1. 구글 폼 문항은 `submit.html` 의 "제출 항목" 표대로 구성합니다.
-2. 응답을 CSV로 내려받습니다.
-3. 사진/그림 파일을 `photos/`, `figures/` 에 넣습니다.
-4. 변환:
-   ```bash
-   python3 tools/build.py import 응답.csv --merge
-   python3 tools/build.py check
-   ```
-   * `--merge` : 기존 데이터에 합치기(같은 ID는 덮어쓰기). 생략하면 전체 교체.
-   * 실행 전 기존 JSON은 자동으로 `.bak` 백업됩니다.
-   * 헤더 이름은 `tools/build.py` 상단 `FIELD_HINTS` 의 문자열이 **포함**되기만 하면 인식됩니다.
+### 방법 A — 등록 양식을 inbox 에 올리기 (평소)
+교수님이 메일로 보낸 양식(xlsx)과 사진을 저장소 루트의 `inbox/` 에 올리면 GitHub Actions 가
+`build.py ingest` 로 반영하고 배포합니다. 이 폴더의 파일을 손댈 일이 없습니다.
+담당자용 안내는 `inbox/README.md`, 운영 절차는 `OPERATIONS.md` 2장.
 
-### 방법 B — JSON 직접 편집
+로컬에서 미리 돌려 보려면:
+```bash
+pip install pillow            # 사진 축소용 (없으면 원본을 그대로 복사)
+python3 tools/build.py ingest ../inbox --dry-run   # 검사만
+python3 tools/build.py ingest ../inbox             # 반영 (처리한 파일은 inbox 에서 지움)
+```
+
+* 양식은 **세로형**입니다. A열 항목 이름 / B열 내용, A열이 빈 행은 바로 위 항목에 이어 붙습니다.
+  항목 정의는 `tools/build.py` 의 `FORM` 하나뿐이고, 양식 파일(`assets/profile-form.xlsx`)은
+  `sync` 가 이 정의와 `societies.json` 으로 만듭니다. 항목 이름을 바꾸면 이미 나간 양식을 못 읽으므로
+  예전 이름을 `FORM_ALIASES` 에 남기세요.
+* 누구의 프로필인지는 양식의 **E-mail** 로 찾습니다 (같으면 수정, 없으면 신규). 양식의 '프로필 id' 칸이
+  채워져 있으면 그 id 를 씁니다.
+* 사진은 `photos/<id>.jpg`(긴 변 1000px), 그림은 `figures/<id>-1.png|jpg`(긴 변 1600px)로 저장됩니다.
+  양식에 사진·그림이 없으면 기존 파일을 유지합니다.
+* 하나라도 문제가 있으면 아무것도 바꾸지 않고 종료 코드 1 로 끝납니다.
+
+### 방법 C — JSON 직접 편집
 `data/researchers.json` 에 아래 형식으로 항목을 추가한 뒤, **반드시** 동기화 명령을 실행합니다.
+(GitHub 웹에서 고쳐 main 에 커밋한 경우에는 배포 때 자동으로 동기화됩니다)
 ```bash
 python3 tools/build.py sync
 ```
@@ -110,10 +123,11 @@ python3 tools/build.py check          # 사람이 보기 위한 점검
 python3 tools/build.py check --strict # 문제가 있으면 종료 코드 1 (GitHub Actions 용)
 ```
 필수 항목 누락, ID 중복, 키워드 개수(5~10개 권장), 한마디 길이, 소사이어티 표기,
-사진·그림 파일 존재 여부, `researchers.js` 동기화 여부를 확인합니다.
+사진·그림 파일 존재 여부, `researchers.js`·등록 양식 동기화 여부를 확인합니다.
 
 ### 특정 프로필만 임시로 내리기
-삭제하지 말고 해당 항목에 `"visible": false` 를 넣은 뒤 `sync` 하세요.
+평소에는 `inbox/요청.txt` 에 `비공개 프로필id` 라고 적어 올리면 됩니다.
+직접 고칠 때는 삭제하지 말고 해당 항목에 `"visible": false` 를 넣은 뒤 `sync` 하세요.
 목록·검색·상세에서 즉시 사라지고, 내용은 저장소에 남습니다.
 
 ## 4. PDF 브로셔 만들기
@@ -158,10 +172,10 @@ python3 tools/build.py check --strict # 문제가 있으면 종료 코드 1 (Git
 
 저장소 루트의 **`OPERATIONS.md`** 에 정리되어 있습니다. 요약하면:
 
-1. 교수님은 **구글 폼**으로 제출 (GitHub 계정 불필요)
-2. 담당자가 신원·내용 확인 후 `build.py import` → **Pull Request** 생성
-3. GitHub Actions 가 데이터 자동 검증, 검토위원이 승인
-4. **머지 = 게시 승인**, 머지 즉시 GitHub Pages 로 자동 배포
+1. 교수님은 **등록 양식(xlsx) + 사진**을 소속 기관 메일로 제출 (GitHub 계정 불필요)
+2. 담당자가 본인 확인 후 GitHub 웹에서 `inbox/` 에 끌어다 놓고 Commit
+3. GitHub Actions 가 양식 검사·사진 축소 후 `researchers.json` 에 반영하고 커밋
+4. `check --strict` 통과 시 GitHub Pages 로 자동 배포
 
-관련 파일: `.github/workflows/validate.yml`(PR 검증), `.github/workflows/deploy.yml`(배포),
-`.github/pull_request_template.md`(검토 체크리스트), `.github/ISSUE_TEMPLATE/`(GitHub 등록 경로).
+관련 파일: `inbox/README.md`(담당자 안내), `.github/workflows/deploy.yml`(반영·검증·배포),
+`.github/workflows/validate.yml`(PR 검증), `.github/pull_request_template.md`.
