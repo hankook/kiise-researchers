@@ -46,6 +46,7 @@ KST = timezone(timedelta(hours=9))
 # ※ 실제 접수 메일로 바꾼 뒤 `python3 tools/build.py sync` — 등록 양식 안내문에 들어갑니다.
 SUBMIT_EMAIL = "example@kiise.or.kr"
 
+KEYWORDS_MIN, KEYWORDS_MAX = 3, 5   # 연구 키워드 개수
 PHOTO_SIZE = 1000    # 사진 긴 변 최대 px
 FIGURE_SIZE = 1600   # 연구내용 그림 긴 변 최대 px
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -65,7 +66,7 @@ FORM = [
     ("email",         "E-mail",              "text",  1, "프로필에 공개되는 연락처. 나중에 수정 양식을 보내실 때도 같은 주소로 적어 주세요"),
     ("homepage",      "연구실 홈페이지",        "text",  1, "선택 — 없으면 비워 두세요"),
     ("links",         "추가 링크",             "links", 3, "선택 — 칸 하나에 하나, 라벨|주소  예) Google Scholar|https://scholar.google.com/…"),
-    ("keywords",      "연구 키워드",           "list",  1, "쉼표로 구분, 5~10개  예) 기계학습, 표현학습, 자기지도학습, 멀티모달, 신뢰가능 AI"),
+    ("keywords",      "연구 키워드",           "list",  1, "쉼표로 구분, %d~%d개  예) 기계학습, 표현학습, 멀티모달" % (KEYWORDS_MIN, KEYWORDS_MAX)),
     ("societies",     "소사이어티·연구회",      "list",  1, "정보과학회 내 소속. '소사이어티 목록' 시트의 이름 그대로, 쉼표로 구분"),
     ("conferences",   "주로 참석하는 학회",     "list",  1, "쉼표로 구분  예) NeurIPS, ICML, 한국소프트웨어종합학술대회(KSC)"),
     ("message",       "한마디",               "text",  1, "선택 — 120자 이내, 동료 연구자들께 전하고 싶은 한 문장"),
@@ -270,8 +271,8 @@ def record_problems(r, official):
     kw = r.get("keywords") or []
     if not kw:
         p.append("연구 키워드 없음")
-    elif not 5 <= len(kw) <= 10:
-        p.append("연구 키워드 %d개 (5~10개 필요)" % len(kw))
+    elif not KEYWORDS_MIN <= len(kw) <= KEYWORDS_MAX:
+        p.append("연구 키워드 %d개 (%d~%d개 필요)" % (len(kw), KEYWORDS_MIN, KEYWORDS_MAX))
     if official:
         for soc in r.get("societies", []):
             if soc not in official:

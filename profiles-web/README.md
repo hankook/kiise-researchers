@@ -95,7 +95,7 @@ python3 tools/build.py sync
   "homepage": "https://example.ac.kr/~jbkim",
   "links": [{ "label": "Google Scholar", "url": "https://scholar.google.com/" }],
   "message": "데이터는 있는데 정답이 없다면 언제든 연락 주세요.",   // 한마디 (120자 이내)
-  "keywords": ["기계학습", "표현학습", "..."],   // 5~10개 권장
+  "keywords": ["기계학습", "표현학습", "..."],   // 3~5개
   "societies": ["인공지능 소사이어티"],          // 정보과학회 소사이어티·연구회
   "conferences": ["NeurIPS", "ICML"],         // 주로 참석하는 학회
   "career": ["항목1", "항목2"],                // 주요 경력 — 이력 중심 (불릿)
@@ -123,7 +123,7 @@ python3 tools/build.py sync
 python3 tools/build.py check          # 사람이 보기 위한 점검
 python3 tools/build.py check --strict # 문제가 있으면 종료 코드 1 (GitHub Actions 용)
 ```
-필수 항목 누락, ID 중복, 키워드 개수(5~10개 권장), 한마디 길이, 소사이어티 표기,
+필수 항목 누락, ID 중복, 키워드 개수(3~5개), 한마디 길이, 소사이어티 표기,
 사진·그림 파일 존재 여부, `researchers.js`·등록 양식 동기화 여부를 확인합니다.
 
 ### 특정 프로필만 임시로 내리기

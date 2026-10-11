@@ -82,7 +82,7 @@ KoPub Dotum). 이 두 파일은 새 저장소에도 `reference/` 등으로 함�
 | `degree` / `appointedAt` | 최종 학위 / 최초 임용일 (`YYYY-MM`) |
 | `email` / `homepage` / `links[]` | 연락처. `links` 는 `{label, url}` |
 | `message` | **한마디** (120자 이내). 헤더 인용구 + 목록 카드 소개문 |
-| `keywords[]` | 연구 키워드 5~10개 |
+| `keywords[]` | 연구 키워드 3~5개 (2026-10 에 5~10개에서 줄임. `build.py` 의 `KEYWORDS_MIN/MAX`) |
 | `societies[]` | **정보과학회 소사이어티·연구회** |
 | `conferences[]` | **주로 참석하는 학회** |
 | `career[]` | **주요 경력** — 이력 중심 |
@@ -197,7 +197,7 @@ KoPub Dotum). 이 두 파일은 새 저장소에도 `reference/` 등으로 함�
 - [ ] 접수 메일 주소 확정 → `tools/build.py` 의 `SUBMIT_EMAIL`, `submit.html` 의 `example@kiise.or.kr` 교체 후 `sync`
 - [ ] `.github/ISSUE_TEMPLATE/config.yml` 의 `EXAMPLE` 주소 교체 (등록 안내 페이지, 담당자 메일)
 - [ ] GitHub 에서 처음 돌려 보기: 본인 정보로 양식을 채워 `inbox/` 에 올림 → Actions ✓ → 사이트 확인
-      → `inbox/요청.txt` 에 `삭제 id` 로 지움. 일부러 키워드 4개짜리를 올려 실패 Summary 도 확인
+      → `inbox/요청.txt` 에 `삭제 id` 로 지움. 일부러 키워드 6개짜리를 올려 실패 Summary 도 확인
 - [ ] `index.html` / `submit.html` 푸터의 문의처 교체
 - [ ] 신진연구자 **자격 기준 확정** (예: 임용 7년 이내 / 만 45세 이하 — 위원회 의결 필요)
 
