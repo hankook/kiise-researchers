@@ -464,8 +464,13 @@ def save_image(src, dest, kind):
 
 
 def match_images(people, images, errors, rel):
-    """양식의 '사진 파일명'·'그림 파일명'으로 이미지를 짝짓습니다.
-    사진 파일명을 비워 둔 양식은, 같은 폴더에 양식이 그것 하나뿐이고 남은 이미지도 하나면 그것을 사진으로 봅니다."""
+    """양식의 '사진 파일명'·'그림1/2 파일명'으로 이미지를 짝짓습니다.
+
+    사진: 적힌 파일이 없거나 칸이 비어 있으면, 같은 폴더에 양식이 그것 하나뿐이고 남은 이미지도 하나면
+          그것을 사진으로 봅니다. 그래도 사진이 없을 때 이미 게시된 프로필이면 기존 사진을 유지합니다
+          (예전 양식을 고쳐 보내면서 사진은 다시 첨부하지 않은 경우). 처음 등록인데 적힌 파일이 없으면 오류.
+    그림: 자리(1·2)별로 같은 규칙. 적힌 파일이 없으면 그 자리의 기존 그림을 유지하고, 없으면 오류.
+          그림은 이름 없이 자동으로 짝짓지 않습니다."""
     claimed = {}
 
     def find(p, name):
@@ -478,26 +483,32 @@ def match_images(people, images, errors, rel):
         return hits[0] if len(hits) == 1 else None
 
     for p in people:
-        p["photo_src"], p["figure_src"] = None, []
+        old = p["old"] or {}
+        old_figs = (old.get("research") or {}).get("figures") or []
+        p["photo_src"], p["photo_named"], p["figure_src"], p["keep_figure"] = None, "", {}, {}
         for key in ("photo", "figure1", "figure2"):
             name = first(p["values"], key)
             if not name:
                 continue
             hit = find(p, name)
-            if not hit:
-                errors.append((rel(p["file"]), "%s '%s' 에 해당하는 파일이 같은 폴더에 없습니다" % (LABEL_OF[key], name)))
-                continue
-            if claimed.get(hit, p) is not p:
+            if hit and claimed.get(hit, p) is not p:
                 errors.append((rel(hit), "두 양식이 같은 이미지 파일을 가리킵니다"))
                 continue
-            claimed[hit] = p
+            if hit:
+                claimed[hit] = p
             if key == "photo":
-                p["photo_src"] = hit
+                p["photo_named"], p["photo_src"] = name, hit
+                continue
+            k = int(key[-1])
+            if hit:
+                p["figure_src"][k] = hit
+            elif len(old_figs) >= k:
+                p["keep_figure"][k] = name
             else:
-                p["figure_src"].append((hit, first(p["values"], "caption" + key[-1])))
+                errors.append((rel(p["file"]), "%s '%s' 에 해당하는 파일이 같은 폴더에 없습니다" % (LABEL_OF[key], name)))
 
     for p in people:
-        if p["photo_src"] or first(p["values"], "photo"):
+        if p["photo_src"]:
             continue
         folder = os.path.dirname(p["file"])
         tables_here = [q for q in people if os.path.dirname(q["file"]) == folder]
@@ -505,11 +516,16 @@ def match_images(people, images, errors, rel):
         if len(tables_here) == 1 and len(rest) == 1:
             p["photo_src"] = rest[0]
             claimed[rest[0]] = p
+            if p["photo_named"]:
+                p["notes"].append("사진 파일명 '%s' 대신 함께 올라온 %s 를 사진으로 사용"
+                                  % (p["photo_named"], os.path.basename(rest[0])))
         elif len(tables_here) == 1 and len(rest) > 1:
             errors.append((rel(p["file"]), "사진으로 볼 수 있는 이미지가 %d개입니다 (%s). 양식의 '사진 파일명' 칸에 어느 파일인지 적어 주세요"
                            % (len(rest), ", ".join(os.path.basename(i) for i in rest))))
             for i in rest:
                 claimed[i] = p
+        elif p["photo_named"] and not is_local((p["old"] or {}).get("photo")):
+            errors.append((rel(p["file"]), "사진 파일명 '%s' 에 해당하는 파일이 같은 폴더에 없습니다" % p["photo_named"]))
 
     for i in images:
         if i not in claimed:
@@ -640,19 +656,30 @@ def cmd_ingest(inbox, dry_run=False, message_file=None):
                 p["notes"].append("사진 " + os.path.basename(p["photo_src"]))
         elif old and is_local(old.get("photo")):
             rec["photo"] = old["photo"]
-            p["notes"].append("사진은 기존 것 유지")
+            p["notes"].append("사진 파일('%s')이 없어 기존 사진 유지" % p["photo_named"] if p["photo_named"]
+                              else "사진은 기존 것 유지")
         else:
             p["notes"].append("사진 없음 — 이름 첫 글자로 표시")
-        if p["figure_src"]:
-            for k, (src, caption) in enumerate(p["figure_src"], 1):
-                dest, err = plan_image(src, "figure", p["id"], k)
-                if err:
-                    errors.append((rel(src), err))
-                    continue
-                rec["research"]["figures"].append({"src": dest, "caption": caption})
-                jobs.append((src, dest, "figure"))
+        old_figs = ((old or {}).get("research") or {}).get("figures") or []
+        if any(first(p["values"], "figure%d" % k) for k in (1, 2)):
+            for k in (1, 2):
+                caption = first(p["values"], "caption%d" % k)
+                if k in p["figure_src"]:
+                    src = p["figure_src"][k]
+                    dest, err = plan_image(src, "figure", p["id"], k)
+                    if err:
+                        errors.append((rel(src), err))
+                        continue
+                    rec["research"]["figures"].append({"src": dest, "caption": caption})
+                    jobs.append((src, dest, "figure"))
+                elif k in p["keep_figure"]:
+                    fig = dict(old_figs[k - 1])
+                    if caption:
+                        fig["caption"] = caption
+                    rec["research"]["figures"].append(fig)
+                    p["notes"].append("그림%d 파일('%s')이 없어 기존 그림 유지" % (k, p["keep_figure"][k]))
         elif old:
-            rec["research"]["figures"] = (old.get("research") or {}).get("figures", [])
+            rec["research"]["figures"] = old_figs
         if old:
             if old.get("visible") is False:
                 rec["visible"] = False
