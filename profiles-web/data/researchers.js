@@ -129,7 +129,7 @@ window.RESEARCHERS = [
       "자연어처리 분야와의 RAG 시스템 공동연구",
       "스토리지·하드웨어 가속 분야와의 시스템 최적화"
     ],
-    "visible": false,
+    "visible": true,
     "updatedAt": "2026-09-05"
   },
   {
