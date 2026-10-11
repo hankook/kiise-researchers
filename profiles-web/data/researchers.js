@@ -413,7 +413,7 @@ window.RESEARCHERS = [
       "Machine Learning",
       "Artificial Intelligence",
       "Multi-Modal AI",
-      "Foundaion Models",
+      "Foundation Models",
       "Efficient Learning"
     ],
     "societies": [],
