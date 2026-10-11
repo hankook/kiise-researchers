@@ -39,12 +39,7 @@
     if (state.soc) p.set("soc", state.soc);
     if (state.sort !== "name") p.set("sort", state.sort);
     var s = p.toString();
-    /* file:// 로 열었을 때 replaceState 가 막히는 브라우저가 있어 예외를 무시 */
-    try {
-      history.replaceState(null, "", s ? "#" + s : location.pathname + location.search);
-    } catch (e) {
-      location.hash = s;
-    }
+    history.replaceState(null, "", s ? "#" + s : location.pathname + location.search);
   }
 
   /* ------------------------------------------------------------- 필터 로직 */
@@ -151,11 +146,10 @@
         "</div>" +
         '<p class="card__desc">' + hl(summaryOf(r)) + "</p>" +
         '<div class="card__kw">' +
-          r.keywords.slice(0, 5).map(function (k) {
+          r.keywords.map(function (k) {
             var on = state.kws.indexOf(k) !== -1;
             return '<span class="kw' + (on ? "" : " kw--muted") + '">' + hl(k) + "</span>";
           }).join("") +
-          (r.keywords.length > 5 ? '<span class="kw kw--muted">+' + (r.keywords.length - 5) + "</span>" : "") +
         "</div>" +
       "</a>"
     );
@@ -228,6 +222,6 @@
     render();
   }).catch(function (err) {
     el.cards.innerHTML = '<div class="empty"><strong>데이터를 불러오지 못했습니다.</strong>' +
-      K.escape(err.message) + "<br>로컬 파일로 열었다면 README의 실행 방법을 확인해 주세요.</div>";
+      K.escape(err.message) + "</div>";
   });
 })();

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-한국정보과학회 신진연구자 프로필 브로셔 — 데이터 빌드 도구
+한국정보과학회 신진연구자 프로필 브로셔 — 데이터 도구 (저장소 루트에서 실행)
 
-사용법 (profiles-web 폴더에서 실행)
-  python3 tools/build.py ingest ../inbox [--dry-run]
-      inbox 폴더에 올라온 등록 양식(xlsx·csv)·사진·요청(txt)을 반영합니다.
-        - 양식 → data/researchers.json 에 추가. E-mail 이 같은 기존 프로필이 있으면 그 프로필을 고칩니다.
+  python3 tools/build.py ingest [--dry-run]
+      inbox/ 에 올라온 등록 양식(xlsx·csv)·사진·요청(txt)을 반영합니다.
+        - 양식 → profiles-web/data/researchers.json 에 추가. E-mail 이 같은 프로필이 있으면 그 프로필을 고칩니다.
         - 사진·그림 → 크기를 줄여 photos/ , figures/ 에 저장 (Pillow 필요. 없으면 원본을 그대로 복사)
         - 요청 txt → 한 줄에 하나씩 "비공개 프로필id" / "공개 프로필id" / "삭제 프로필id"
       처리한 파일은 inbox 에서 지웁니다. 문제가 하나라도 있으면 아무것도 바꾸지 않고
@@ -14,14 +13,11 @@
       평소에는 GitHub Actions(deploy.yml)가 main 에 파일이 올라올 때마다 실행합니다.
 
   python3 tools/build.py sync
-      data/researchers.json → data/researchers.js (file:// 로 직접 열 때 쓰는 폴백)
       아래 FORM 정의 + data/societies.json → assets/profile-form.xlsx (교수님용 등록 양식)
-      JSON 이나 societies.json 을 손으로 고친 뒤에는 반드시 실행하세요. (배포 때도 자동 실행)
 
   python3 tools/build.py check [--strict]
-      데이터 무결성을 점검합니다. 필수 항목 누락, id 중복·형식, 연구 키워드 개수, 한마디 길이,
-      소사이어티 표기, 사진·그림 파일 존재 여부, researchers.js·등록 양식 동기화 여부를 확인합니다.
-      --strict 를 주면 문제가 있을 때 종료 코드 1 을 반환합니다 (GitHub Actions 용).
+      필수 항목, id 중복·형식, 연구 키워드 개수, 한마디 길이, 소사이어티 표기,
+      사진·그림 파일, 등록 양식 최신 여부를 점검합니다. --strict 면 문제가 있을 때 종료 코드 1.
 """
 import csv
 import io
@@ -36,9 +32,10 @@ from datetime import date, datetime, timedelta, timezone
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import xlsx  # noqa: E402  (같은 폴더의 표준 라이브러리 기반 xlsx 읽기·쓰기)
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+INBOX = os.path.join(REPO, "inbox")
+ROOT = os.path.join(REPO, "profiles-web")      # 배포되는 사이트 폴더. 사진·그림 경로의 기준
 JSON_PATH = os.path.join(ROOT, "data", "researchers.json")
-JS_PATH = os.path.join(ROOT, "data", "researchers.js")
 SOCIETIES_PATH = os.path.join(ROOT, "data", "societies.json")
 FORM_PATH = os.path.join(ROOT, "assets", "profile-form.xlsx")
 KST = timezone(timedelta(hours=9))
@@ -52,38 +49,36 @@ FIGURE_SIZE = 1600   # 연구내용 그림 긴 변 최대 px
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 
 # 등록 양식(세로형). 양식 생성과 읽기가 모두 이 정의를 씁니다.
-#   (키, A열 항목 이름, 종류, 입력 칸 수, C열 안내)
-#   종류: text 한 칸 / list 쉼표 구분 / lines 칸 하나에 항목 하나 / links 라벨|주소 / file 첨부 파일 이름
-# 항목 이름을 바꾸면 이미 배포한 양식을 읽지 못하므로, 바꿀 때는 예전 이름도 FORM_ALIASES 에 남기세요.
+#   (키, A열 항목 이름, 입력 칸 수, C열 안내)
+# 항목은 A열 이름으로 찾으므로, 이름을 바꾸면 이미 나간 양식은 그 항목을 못 읽습니다.
 FORM = [
-    ("name",          "성명(국문)",            "text",  1, "예) 김정보"),
-    ("nameEn",        "성명(영문)",            "text",  1, "예) Jeongbo Kim — 프로필 주소를 만드는 데 쓰입니다"),
-    ("affiliation",   "소속 기관",             "text",  1, "예) ○○대학교"),
-    ("department",    "소속 학과/학부",         "text",  1, "예) 컴퓨터공학과"),
-    ("position",      "직위",                 "text",  1, "목록에서 고르거나 직접 입력"),
-    ("degree",        "최종 학위",             "text",  1, "예) ○○대학교 공학박사 (인공지능)"),
-    ("appointedAt",   "최초 임용일",           "text",  1, "예) 2024-03"),
-    ("email",         "E-mail",              "text",  1, "프로필에 공개되는 연락처. 나중에 수정 양식을 보내실 때도 같은 주소로 적어 주세요"),
-    ("homepage",      "연구실 홈페이지",        "text",  1, "선택 — 없으면 비워 두세요"),
-    ("links",         "추가 링크",             "links", 3, "선택 — 칸 하나에 하나, 라벨|주소  예) Google Scholar|https://scholar.google.com/…"),
-    ("keywords",      "연구 키워드",           "list",  1, "쉼표로 구분, %d~%d개  예) 기계학습, 표현학습, 멀티모달" % (KEYWORDS_MIN, KEYWORDS_MAX)),
-    ("societies",     "소사이어티·연구회",      "list",  1, "정보과학회 내 소속. '소사이어티 목록' 시트의 이름 그대로, 쉼표로 구분"),
-    ("conferences",   "주로 참석하는 학회",     "list",  1, "쉼표로 구분  예) NeurIPS, ICML, 한국소프트웨어종합학술대회(KSC)"),
-    ("message",       "한마디",               "text",  1, "선택 — 120자 이내, 동료 연구자들께 전하고 싶은 한 문장"),
-    ("career",        "주요 경력",             "lines", 5, "이력 중심 — 현 직위, 이전 소속, 학위 등. 칸 하나에 하나, 모자라면 아래에 행 삽입"),
-    ("achievements",  "대표 논문 및 수행과제",   "lines", 5, "실적 중심 — 주저자 논문, 수행 과제, 특허, 수상 등"),
-    ("goals",         "연구목표",              "lines", 3, "칸 하나에 목표 하나"),
-    ("research",      "연구내용",              "lines", 3, "칸 하나가 한 문단"),
-    ("collaboration", "공동연구 희망분야",      "lines", 3, "협력 가능한 분야·데이터·기술"),
-    ("photo",         "사진 파일명",           "file",  1, "메일에 첨부한 사진의 파일 이름  예) kim.jpg — 세로 3:4, JPG·PNG"),
-    ("figure1",       "그림1 파일명",          "file",  1, "선택 — 연구내용 그림(가로형 권장)을 첨부했다면 파일 이름"),
-    ("caption1",      "그림1 설명",            "text",  1, "선택"),
-    ("figure2",       "그림2 파일명",          "file",  1, "선택 — 그림이 많으면 A4 한 면을 넘습니다. 최대 2장"),
-    ("caption2",      "그림2 설명",            "text",  1, "선택"),
-    ("consent",       "공개 동의",             "text",  1, "위 내용을 신진연구자 브로셔에 공개하는 데 동의하시면 '동의'라고 적어 주세요"),
-    ("id",            "프로필 id",             "text",  1, "담당자용 — 비워 두세요"),
+    ("name",          "성명(국문)",            1, "예) 김정보"),
+    ("nameEn",        "성명(영문)",            1, "예) Jeongbo Kim — 프로필 주소를 만드는 데 쓰입니다"),
+    ("affiliation",   "소속 기관",             1, "예) ○○대학교"),
+    ("department",    "소속 학과/학부",         1, "예) 컴퓨터공학과"),
+    ("position",      "직위",                 1, "목록에서 고르거나 직접 입력"),
+    ("degree",        "최종 학위",             1, "예) ○○대학교 공학박사 (인공지능)"),
+    ("appointedAt",   "최초 임용일",           1, "예) 2024-03"),
+    ("email",         "E-mail",              1, "프로필에 공개되는 연락처. 나중에 수정 양식을 보내실 때도 같은 주소로 적어 주세요"),
+    ("homepage",      "연구실 홈페이지",        1, "선택 — 없으면 비워 두세요"),
+    ("links",         "추가 링크",             3, "선택 — 칸 하나에 하나, 라벨|주소  예) Google Scholar|https://scholar.google.com/…"),
+    ("keywords",      "연구 키워드",           1, "쉼표로 구분, %d~%d개  예) 기계학습, 표현학습, 멀티모달" % (KEYWORDS_MIN, KEYWORDS_MAX)),
+    ("societies",     "소사이어티·연구회",      1, "정보과학회 내 소속. '소사이어티 목록' 시트의 이름 그대로, 쉼표로 구분"),
+    ("conferences",   "주로 참석하는 학회",     1, "쉼표로 구분  예) NeurIPS, ICML, 한국소프트웨어종합학술대회(KSC)"),
+    ("message",       "한마디",               1, "선택 — 120자 이내, 동료 연구자들께 전하고 싶은 한 문장"),
+    ("career",        "주요 경력",             5, "이력 중심 — 현 직위, 이전 소속, 학위 등. 칸 하나에 하나, 모자라면 아래에 행 삽입"),
+    ("achievements",  "대표 논문 및 수행과제",   5, "실적 중심 — 주저자 논문, 수행 과제, 특허, 수상 등"),
+    ("goals",         "연구목표",              3, "칸 하나에 목표 하나"),
+    ("research",      "연구내용",              3, "칸 하나가 한 문단"),
+    ("collaboration", "공동연구 희망분야",      3, "협력 가능한 분야·데이터·기술"),
+    ("photo",         "사진 파일명",           1, "메일에 첨부한 사진의 파일 이름  예) kim.jpg — 세로 3:4, JPG·PNG"),
+    ("figure1",       "그림1 파일명",          1, "선택 — 연구내용 그림(가로형 권장)을 첨부했다면 파일 이름"),
+    ("caption1",      "그림1 설명",            1, "선택"),
+    ("figure2",       "그림2 파일명",          1, "선택 — 그림이 많으면 A4 한 면을 넘습니다. 최대 2장"),
+    ("caption2",      "그림2 설명",            1, "선택"),
+    ("consent",       "공개 동의",             1, "위 내용을 신진연구자 브로셔에 공개하는 데 동의하시면 '동의'라고 적어 주세요"),
+    ("id",            "프로필 id",             1, "담당자용 — 비워 두세요"),
 ]
-FORM_ALIASES = {}   # 예전 항목 이름 → 키
 POSITIONS = ["조교수", "부교수", "교수", "연구교수", "선임연구원", "책임연구원"]
 FORM_NOTE = ("노란 칸(B열)에 입력해 주세요. 여러 줄 항목은 칸 하나에 하나씩 쓰고, 칸이 모자라면 바로 아래에 행을 삽입하세요.\n"
              "작성한 이 파일과 사진(그림)을 소속 기관 메일로 %s 에 보내 주세요.")
@@ -213,15 +208,7 @@ def decode(raw):
     raise ValueError("글자 인코딩을 알 수 없습니다")
 
 
-# ------------------------------------------------- researchers.js · 등록 양식 동기화
-def render_js(data):
-    body = json.dumps(data, ensure_ascii=False, indent=2)
-    return ("/* 자동 생성 파일 — 직접 수정하지 마세요.\n"
-            "   data/researchers.json 을 고친 뒤 `python3 tools/build.py sync` 를 실행하면 갱신됩니다.\n"
-            "   file:// 로 페이지를 직접 열었을 때(fetch 불가) 사용되는 폴백 데이터입니다. */\n"
-            "window.RESEARCHERS = " + body + ";\n")
-
-
+# ------------------------------------------------------------- 등록 양식 생성
 def render_form():
     S = xlsx
     rows = [
@@ -230,7 +217,7 @@ def render_form():
         [("항목", S.HEADER), ("내용 (이 열에 입력)", S.HEADER), ("안내", S.HEADER)],
     ]
     validations = []
-    for key, label, kind, n, hint in FORM:
+    for key, label, n, hint in FORM:
         first_row = len(rows) + 1
         for i in range(n):
             rows.append([(label if i == 0 else "", S.LABEL), ("", S.INPUT), (hint if i == 0 else "", S.HINT)])
@@ -251,10 +238,6 @@ def render_form():
 
 
 def cmd_sync():
-    data = load_data()
-    with open(JS_PATH, "w", encoding="utf-8") as f:
-        f.write(render_js(data))
-    log("✓ data/researchers.js 생성 완료 (%d명)" % len(data))
     os.makedirs(os.path.dirname(FORM_PATH), exist_ok=True)
     with open(FORM_PATH, "wb") as f:
         f.write(render_form())
@@ -286,10 +269,6 @@ def cmd_check(strict=False):
     data = load_data()
     problems = []
 
-    current = open(JS_PATH, encoding="utf-8").read() if os.path.exists(JS_PATH) else ""
-    if current != render_js(data):
-        problems.append("data/researchers.js 가 최신이 아닙니다. "
-                        "`python3 tools/build.py sync` 를 실행하고 함께 커밋하세요.")
     form = open(FORM_PATH, "rb").read() if os.path.exists(FORM_PATH) else b""
     if form != render_form():
         problems.append("assets/profile-form.xlsx(등록 양식)가 최신이 아닙니다. "
@@ -335,9 +314,8 @@ def norm_label(s):
     return re.sub(r"[\W_]+", "", str(s)).lower()
 
 
-LABELS = {norm_label(label): key for key, label, _, _, _ in FORM}
-LABELS.update({norm_label(k): v for k, v in FORM_ALIASES.items()})
-LABEL_OF = {key: label for key, label, _, _, _ in FORM}
+LABELS = {norm_label(label): key for key, label, _, _ in FORM}
+LABEL_OF = {key: label for key, label, _, _ in FORM}
 
 
 def read_table(path):
@@ -567,8 +545,8 @@ def inbox_files(inbox):
     return out
 
 
-def cmd_ingest(inbox, dry_run=False, message_file=None):
-    inbox = os.path.abspath(inbox)
+def cmd_ingest(dry_run=False, message_file=None):
+    inbox = INBOX
     if not os.path.isdir(inbox):
         sys.exit("inbox 폴더가 없습니다: " + inbox)
     files = inbox_files(inbox)
@@ -738,8 +716,6 @@ def cmd_ingest(inbox, dry_run=False, message_file=None):
         if os.path.exists(os.path.join(ROOT, p)):
             os.remove(os.path.join(ROOT, p))
     write_data(new)
-    with open(JS_PATH, "w", encoding="utf-8") as f:
-        f.write(render_js(new))
     for p in files:
         os.remove(p)
     for dirpath, _, _ in sorted(os.walk(inbox), key=lambda w: -len(w[0])):
@@ -806,12 +782,7 @@ if __name__ == "__main__":
     elif args[0] == "check":
         cmd_check(strict="--strict" in args)
     elif args[0] == "ingest":
-        rest = [a for a in args[1:] if not a.startswith("--")]
         msg = args[args.index("--message-file") + 1] if "--message-file" in args else None
-        if msg in rest:
-            rest.remove(msg)
-        if len(rest) != 1:
-            sys.exit("inbox 폴더를 지정하세요. 예) python3 tools/build.py ingest ../inbox")
-        cmd_ingest(rest[0], dry_run="--dry-run" in args, message_file=msg)
+        cmd_ingest(dry_run="--dry-run" in args, message_file=msg)
     else:
         sys.exit("알 수 없는 명령: " + args[0])

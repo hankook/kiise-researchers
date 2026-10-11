@@ -1,4 +1,4 @@
-# main 이 바뀌면 inbox 반영 → 동기화·검증 → (바뀐 것이 있으면 커밋) → GitHub Pages 배포.
+# main 이 바뀌면 inbox 반영 → 양식 생성·점검 → (바뀐 것이 있으면 커밋) → GitHub Pages 배포.
 # 담당자가 GitHub 웹에서 inbox/ 에 등록 양식·사진을 올리는 것만으로 프로필이 게시됩니다.
 # inbox 에 문제가 있으면 아무것도 바꾸지 않고 실패하며, 이유는 실행 화면의 Summary 에 나옵니다.
 name: 프로필 반영 및 배포
@@ -16,9 +16,6 @@ permissions:
 concurrency:
   group: pages
   cancel-in-progress: false   # 반영 도중 끊기지 않도록 차례대로 실행
-
-env:
-  PYTHONDONTWRITEBYTECODE: "1"
 
 jobs:
   deploy:
@@ -39,11 +36,9 @@ jobs:
         run: pip install --quiet pillow pillow-heif
 
       - name: inbox 반영 (등록 양식 · 사진 · 요청)
-        working-directory: profiles-web
-        run: python3 tools/build.py ingest ../inbox --message-file "$RUNNER_TEMP/commit-message.txt"
+        run: python3 tools/build.py ingest --message-file "$RUNNER_TEMP/commit-message.txt"
 
-      - name: 동기화 · 검증
-        working-directory: profiles-web
+      - name: 등록 양식 생성 · 점검
         run: |
           python3 tools/build.py sync
           python3 tools/build.py check --strict
@@ -60,7 +55,7 @@ jobs:
           if [ -f "$RUNNER_TEMP/commit-message.txt" ]; then
             git commit -q -F "$RUNNER_TEMP/commit-message.txt"
           else
-            git commit -q -m "데이터 동기화 (researchers.js · 등록 양식)"
+            git commit -q -m "등록 양식 갱신"
           fi
           git pull -q --rebase origin main    # 그 사이 올라온 파일이 있으면 그 위에 얹음 (다음 실행이 처리)
           git push -q origin HEAD:main

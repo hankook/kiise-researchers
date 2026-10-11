@@ -1,5 +1,5 @@
 {
-  "_note": "⚠ 아래 목록은 양식 확인용 예시입니다. 반드시 한국정보과학회 공식 소사이어티·연구회 목록(https://www.kiise.or.kr)으로 교체한 뒤 운영하세요. 이 파일은 등록 폼 안내와 data/researchers.json 의 표기 검증(tools/build.py check)에만 쓰입니다.",
+  "_note": "⚠ 아래 목록은 양식 확인용 예시입니다. 반드시 한국정보과학회 공식 소사이어티·연구회 목록(https://www.kiise.or.kr)으로 교체한 뒤 운영하세요. 이 파일은 등록 양식의 목록 시트와 표기 검사(tools/build.py)에만 쓰입니다.",
   "_updatedAt": "",
   "societies": [
     "인공지능 소사이어티",

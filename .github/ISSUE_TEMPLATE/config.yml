@@ -1,9 +1,0 @@
-# 프로필 등록·수정은 메일로만 받습니다. (이슈는 공개 글이라 확인 전 내용이 노출됨)
-blank_issues_enabled: false
-contact_links:
-  - name: 프로필 등록·수정 안내 (양식 내려받기)
-    url: https://EXAMPLE.github.io/kiise-researchers/submit.html
-    about: 양식을 채워 사진과 함께 소속 기관 메일로 보내 주세요. GitHub 계정은 필요 없습니다.
-  - name: 담당자 이메일 문의
-    url: mailto:example@kiise.or.kr
-    about: 게시 내용 삭제 요청, 기타 문의

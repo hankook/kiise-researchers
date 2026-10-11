@@ -4,18 +4,12 @@
   var KIISE = (window.KIISE = window.KIISE || {});
 
   /* -------------------------------------------------- 데이터 로드
-     1) http(s) 로 서빙되는 경우: data/researchers.json 을 fetch
-     2) file:// 로 직접 연 경우 : data/researchers.js 가 미리 채워 둔
-        window.RESEARCHERS 를 사용 (브라우저 보안정책상 fetch 불가)        */
+     fetch 를 쓰므로 파일을 더블클릭(file://)해서는 열리지 않습니다. 로컬 서버로 확인하세요. */
   KIISE.load = function () {
     return fetch("data/researchers.json", { cache: "no-cache" })
       .then(function (r) {
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
-      })
-      .catch(function () {
-        if (Array.isArray(window.RESEARCHERS)) return window.RESEARCHERS;
-        throw new Error("프로필 데이터를 불러오지 못했습니다.");
       })
       .then(function (list) {
         return (list || [])
