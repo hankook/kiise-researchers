@@ -89,16 +89,17 @@ def read_rows(path, prefer_sheet=None):
 
 # ------------------------------------------------------------------- 쓰기
 # 셀 스타일 번호 (STYLES 의 cellXfs 순서)
-PLAIN, TITLE, HEADER, LABEL, INPUT, HINT = range(6)
+PLAIN, TITLE, HEADER, LABEL, INPUT, HINT, REQUIRED, OPTIONAL = range(8)
 
 STYLES = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<fonts count="5">
+<fonts count="6">
 <font><sz val="11"/><name val="맑은 고딕"/><family val="2"/></font>
 <font><b/><sz val="14"/><color rgb="FF002060"/><name val="맑은 고딕"/><family val="2"/></font>
 <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="맑은 고딕"/><family val="2"/></font>
 <font><b/><sz val="11"/><name val="맑은 고딕"/><family val="2"/></font>
 <font><sz val="10"/><color rgb="FF666666"/><name val="맑은 고딕"/><family val="2"/></font>
+<font><b/><sz val="10"/><color rgb="FFC00000"/><name val="맑은 고딕"/><family val="2"/></font>
 </fonts>
 <fills count="5">
 <fill><patternFill patternType="none"/></fill>
@@ -112,13 +113,15 @@ STYLES = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border>
 </borders>
 <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs count="6">
+<cellXfs count="8">
 <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
 <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>
 <xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
 <xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
 <xf numFmtId="49" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
 <xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="5" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top"/></xf>
+<xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top"/></xf>
 </cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>
@@ -141,16 +144,18 @@ def _cell(ref, value, style):
         ref, style, escape(str(value)))
 
 
-def sheet_xml(rows, widths, merges=(), validations=(), freeze_rows=0, row_heights=None):
-    """rows: [[(값, 스타일), ...], ...]   validations: [(셀 범위, [선택지, ...]), ...]"""
+def sheet_xml(rows, widths, merges=(), validations=(), freeze_rows=0, row_heights=None, input_col="B"):
+    """rows: [[(값, 스타일), ...], ...]   validations: [(셀 범위, [선택지, ...]), ...]
+    input_col: 파일을 열었을 때 커서가 놓일 열 (고정한 머리 행 바로 아래)"""
     row_heights = row_heights or {}
     out = ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
            '<worksheet xmlns="%s" xmlns:r="%s">' % (MAIN, REL)]
     if freeze_rows:
         top = "A%d" % (freeze_rows + 1)
+        cell = "%s%d" % (input_col, freeze_rows + 1)
         out.append('<sheetViews><sheetView workbookViewId="0"><pane ySplit="%d" topLeftCell="%s" '
-                   'activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="B%d" '
-                   'sqref="B%d"/></sheetView></sheetViews>' % (freeze_rows, top, freeze_rows + 1, freeze_rows + 1))
+                   'activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="%s" '
+                   'sqref="%s"/></sheetView></sheetViews>' % (freeze_rows, top, cell, cell))
     else:
         out.append('<sheetViews><sheetView workbookViewId="0"/></sheetViews>')
     out.append('<sheetFormatPr defaultRowHeight="16.5"/>')

@@ -14,6 +14,9 @@
   .doc thead th { background: var(--navy); color: #fff; font-weight: 700; font-size: 13px; }
   .doc tbody th { background: var(--navy-soft); color: var(--navy); font-weight: 700; width: 26%; }
   .doc td small { color: var(--ink-3); }
+  .doc td.req, .doc td.opt { width: 52px; text-align: center; white-space: nowrap; }
+  .doc .req { color: #c00000; font-weight: 700; }
+  .doc .opt { color: var(--ink-3); }
   .doc code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--navy-soft); color: var(--navy); padding: 1px 5px; border-radius: 4px; font-size: .92em; }
   .doc ol.steps { counter-reset: step; margin: 0 0 18px; padding: 0; list-style: none; }
   .doc ol.steps li { counter-increment: step; position: relative; padding: 0 0 14px 40px; color: var(--ink-2); }
@@ -53,15 +56,16 @@
   <p><a class="btn btn--primary" href="assets/profile-form.xlsx" download="신진연구자_프로필_양식.xlsx">등록 양식 내려받기 (xlsx)</a></p>
 
   <div class="note">
-    분량 기준: 여러 줄 항목은 <b>칸 하나에 한 항목씩</b> 적어 주세요. 칸 하나가 불릿 하나가 됩니다.
-    전체 분량이 A4 1면을 넘으면 인쇄 시 2면으로 나뉘므로, 각 항목 3~5개를 권장합니다.
+    양식에는 항목마다 <b class="req">필수</b> / <b class="opt">선택</b>이 표시되어 있습니다.
+    여러 줄 항목은 <b>칸 하나에 한 항목씩</b> 적어 주세요. 칸 하나가 불릿 하나가 됩니다.
+    A4 한 면에 들어가도록 대표 논문 · 수행과제 · 연구목표 및 내용은 각각 <b>최대 5개</b>까지 받습니다.
   </div>
 
   <h2>등록 절차</h2>
   <ol class="steps">
-    <li><b>작성</b> — 위 양식을 내려받아 노란 칸(B열)을 채워 주세요.
+    <li><b>작성</b> — 위 양식을 내려받아 노란 칸(C열)을 채워 주세요.
       <span>엑셀·한셀·Numbers·구글 시트 어느 것으로 작성하셔도 됩니다. xlsx 로 저장해 주세요.</span></li>
-    <li><b>제출</b> — 작성한 양식과 <b>사진</b>(연구내용 그림이 있으면 함께)을 첨부해
+    <li><b>제출</b> — 작성한 양식과 <b>사진</b>(연구내용 그림이 있으면 1장 함께)을 첨부해
       <b>소속 기관 메일</b>로 <a href="mailto:example@kiise.or.kr">example@kiise.or.kr</a> 에 보내 주세요.
       <span>기관 메일로 보내 주시는 것이 본인 확인을 대신합니다. 양식의 '사진 파일명' 칸에 첨부한 사진 파일 이름을 적어 주세요.</span></li>
     <li><b>게시</b> — 담당 간사가 소속·직위를 학과 공식 홈페이지와 대조한 뒤 게시합니다.
@@ -77,40 +81,28 @@
 
   <h2>양식 항목</h2>
   <table>
-    <thead><tr><th>항목</th><th>작성 방법 / 예시</th></tr></thead>
+    <thead><tr><th>항목</th><th>구분</th><th>작성 방법 / 예시</th></tr></thead>
     <tbody>
-      <tr><th>성명(국문)</th><td>김정보</td></tr>
-      <tr><th>성명(영문)</th><td>Jeongbo Kim <small>(프로필 주소 생성에 사용)</small></td></tr>
-      <tr><th>소속 기관</th><td>○○대학교</td></tr>
-      <tr><th>소속 학과/학부</th><td>컴퓨터공학과</td></tr>
-      <tr><th>직위</th><td>조교수 / 부교수 / 교수 / 연구교수 / 선임연구원 등 <small>(목록에서 고르거나 직접 입력)</small></td></tr>
-      <tr><th>최종 학위</th><td>○○대학교 공학박사 (인공지능)</td></tr>
-      <tr><th>최초 임용일</th><td>2024-03</td></tr>
-      <tr><th>E-mail</th><td>abcde123@xxx.ac.kr <small>(프로필에 공개되는 연락처. 수정본을 보내실 때도 같은 주소로)</small></td></tr>
-      <tr><th>연구실 홈페이지</th><td>선택 — 없으면 비워 두세요.</td></tr>
-      <tr><th>추가 링크</th><td>선택 — 칸 하나에 하나, <code>라벨|주소</code> 형식<br>
-        <small>예) Google Scholar|https://scholar.google.com/…<br>
-        홈페이지가 없는 경우 Scholarworks, Scopus 등 연구자 URL을 기재해 주세요.</small></td></tr>
-      <tr><th>연구 키워드</th><td>쉼표로 구분, <b>3~5개</b><br><small>예) 기계학습, 표현학습, 멀티모달</small></td></tr>
-      <tr><th>소사이어티·연구회</th><td>정보과학회 내 소속 소사이어티 및 연구회. 양식의 <b>'소사이어티 목록' 시트</b>에 있는 이름 그대로, 쉼표로 구분<br>
-        <small>예) 인공지능 소사이어티, 컴퓨터비전 및 패턴인식 연구회</small></td></tr>
-      <tr><th>주로 참석하는 학회</th><td>쉼표로 구분<br>
-        <small>예) NeurIPS, ICML, 한국소프트웨어종합학술대회(KSC)<br>
-        같은 학회에 다니는 연구자를 찾는 데 쓰입니다.</small></td></tr>
-      <tr><th>한마디</th><td>선택 — <b>120자 이내</b>, 동료 연구자들께 전하고 싶은 한 문장<br>
-        <small>예) 데이터는 있는데 정답이 없다면 언제든 연락 주세요.</small></td></tr>
-      <tr><th>주요 경력</th><td>현 직위, 이전 소속, 학위 취득 등 <b>이력 중심</b> — 칸 하나에 하나</td></tr>
-      <tr><th>대표 논문 및 수행과제</th><td>주저자 논문, 수행 과제, 창업, 특허, 수상 등 <b>실적 중심</b> — 칸 하나에 하나<br>
-        <small>경력과 실적을 나누어 적어 주시면 프로필이 한결 읽기 쉬워집니다.</small></td></tr>
-      <tr><th>연구목표</th><td>칸 하나에 목표 하나</td></tr>
-      <tr><th>연구내용</th><td>칸 하나가 한 문단이 됩니다.</td></tr>
-      <tr><th>공동연구 희망분야</th><td>협력 가능한 분야·데이터·기술</td></tr>
-      <tr><th>사진 파일명</th><td>메일에 첨부한 사진의 파일 이름 — 세로형 증명/프로필 사진 (권장 3:4 비율, 600×800px 이상, JPG·PNG)</td></tr>
-      <tr><th>그림1·2 파일명 / 설명</th><td>선택 — 연구내용 그림(가로형 권장, 최대 2장)을 첨부했다면 파일 이름과 한 줄 설명<br>
-        <small>예) 제안 프레임워크 개요</small></td></tr>
-      <tr><th>공개 동의</th><td><b>필수</b> — '동의'라고 적어 주세요<br>
-        <small>· 위 내용을 신진연구자 프로필 브로셔에 공개하는 데 동의합니다.<br>
-        · 본인이 작성한 내용이며 사실과 다른 내용이 없음을 확인합니다.</small></td></tr>
+      <tr><th>성명(국문)</th><td class="req">필수</td><td>김정보</td></tr>
+      <tr><th>성명(영문)</th><td class="req">필수</td><td>Jeongbo Kim <small>(프로필 주소 생성에 사용)</small></td></tr>
+      <tr><th>소속 기관</th><td class="req">필수</td><td>○○대학교</td></tr>
+      <tr><th>소속 학과/학부</th><td class="opt">선택</td><td>컴퓨터공학과</td></tr>
+      <tr><th>직위</th><td class="req">필수</td><td>조교수 / 부교수 / 교수 / 연구교수 / 선임연구원 등 <small>(목록에서 고르거나 직접 입력)</small></td></tr>
+      <tr><th>최종 학위</th><td class="req">필수</td><td>○○대학교 공학박사 (인공지능)</td></tr>
+      <tr><th>최초 임용일</th><td class="req">필수</td><td>2024-03</td></tr>
+      <tr><th>E-mail</th><td class="req">필수</td><td>abcde123@xxx.ac.kr <small>(프로필에 공개되는 연락처. 수정본을 보내실 때도 같은 주소로)</small></td></tr>
+      <tr><th>연구실 홈페이지</th><td class="opt">선택</td><td>https://…</td></tr>
+      <tr><th>추가 링크</th><td class="opt">선택</td><td>칸 하나에 하나, <code>라벨|주소</code> 형식<br><small>예) Google Scholar|https://scholar.google.com/…</small></td></tr>
+      <tr><th>연구 키워드</th><td class="req">필수</td><td>쉼표로 구분, <b>3~5개</b><br><small>예) 기계학습, 표현학습, 멀티모달</small></td></tr>
+      <tr><th>소사이어티·연구회</th><td class="opt">선택</td><td>정보과학회 내 소속. 양식의 <b>'소사이어티 목록' 시트</b>에 있는 이름 그대로, 쉼표로 구분</td></tr>
+      <tr><th>인사말</th><td class="opt">선택</td><td>동료 연구자들께 전하는 인사, <b>120자 이내</b><br><small>예) 데이터는 있는데 정답이 없다면 언제든 연락 주세요.</small></td></tr>
+      <tr><th>주요 경력</th><td class="req">필수</td><td>현 직위, 이전 소속, 학위 등 — 칸 하나에 하나</td></tr>
+      <tr><th>대표 논문</th><td class="opt">선택</td><td>칸 하나에 한 편, <b>최대 5편</b></td></tr>
+      <tr><th>수행과제</th><td class="opt">선택</td><td>칸 하나에 한 건, <b>최대 5건</b></td></tr>
+      <tr><th>연구목표 및 내용</th><td class="req">필수</td><td>칸 하나에 한 문단, <b>최대 5개</b></td></tr>
+      <tr><th>사진 파일명</th><td class="req">필수</td><td>메일에 첨부한 사진의 파일 이름 — 세로형 프로필 사진 (권장 3:4, 600×800px 이상, JPG·PNG)</td></tr>
+      <tr><th>그림 파일명 / 설명</th><td class="opt">선택</td><td>연구내용 그림 1장(가로형 권장)을 첨부했다면 파일 이름과 한 줄 설명</td></tr>
+      <tr><th>공개 동의</th><td class="req">필수</td><td>'동의'라고 적어 주세요<br><small>· 위 내용을 신진연구자 프로필 브로셔에 공개하는 데 동의합니다.<br>· 본인이 작성한 내용이며 사실과 다른 내용이 없음을 확인합니다.</small></td></tr>
     </tbody>
   </table>
 </main>

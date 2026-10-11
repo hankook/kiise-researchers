@@ -9,14 +9,16 @@
     return new URLSearchParams(location.search).get(name);
   }
 
+  /* 내용이 없으면 빈 문자열 → 그 섹션은 그리지 않음 */
   function bullets(items) {
-    if (!items || !items.length) return '<p class="pf-none">준비 중입니다.</p>';
+    if (!items || !items.length) return "";
     return '<ul class="pf-list">' + items.map(function (t) {
       return "<li>" + K.escape(t) + "</li>";
     }).join("") + "</ul>";
   }
 
   function section(title, bodyHTML) {
+    if (!bodyHTML) return "";
     return (
       '<section class="pf-sec">' +
         '<h2 class="pf-sec__title">' + K.escape(title) + "</h2>" +
@@ -78,47 +80,20 @@
   }
 
   function researchHTML(r) {
-    var body = r.research.body.length
-      ? r.research.body.map(function (p) { return "<p>" + K.escape(p) + "</p>"; }).join("")
-      : '<p class="pf-none">준비 중입니다.</p>';
-    var figs = r.research.figures.length
-      ? '<div class="pf-figs">' + r.research.figures.map(function (f) {
-          return '<figure class="pf-fig"><img src="' + K.escape(f.src) + '" alt="' +
-            K.escape(f.caption || "연구 내용 그림") + '">' +
-            (f.caption ? "<figcaption>" + K.escape(f.caption) + "</figcaption>" : "") + "</figure>";
-        }).join("") + "</div>"
+    var fig = r.figure && r.figure.src
+      ? '<figure class="pf-fig"><img src="' + K.escape(r.figure.src) + '" alt="' +
+          K.escape(r.figure.caption || "연구 내용 그림") + '">' +
+          (r.figure.caption ? "<figcaption>" + K.escape(r.figure.caption) + "</figcaption>" : "") + "</figure>"
       : "";
-    return body + figs;
+    return fig + bullets(r.research);   /* 그림을 먼저 두어 글이 그림 옆으로 흐르게 */
   }
 
-  function chips(items, filterKey, muted) {
-    if (!items || !items.length) return '<p class="pf-none">등록된 내용이 없습니다.</p>';
+  /* 키워드·소사이어티 칩. 누르면 그 조건으로 걸러진 목록으로 이동 */
+  function chips(items, filterKey) {
+    if (!items || !items.length) return "";
     return '<div class="pf-kws">' + items.map(function (k) {
-      var cls = "kw" + (muted ? " kw--muted" : "");
-      return filterKey
-        ? '<a class="' + cls + '" href="index.html#' + filterKey + "=" + encodeURIComponent(k) + '">' + K.escape(k) + "</a>"
-        : '<span class="' + cls + '">' + K.escape(k) + "</span>";
+      return '<a class="kw" href="index.html#' + filterKey + "=" + encodeURIComponent(k) + '">' + K.escape(k) + "</a>";
     }).join("") + "</div>";
-  }
-
-  function kwHTML(r) {
-    if (!r.keywords.length) return '<p class="pf-none">등록된 키워드가 없습니다.</p>';
-    return chips(r.keywords, "kw");
-  }
-
-  /* 학회 활동 — 소사이어티·연구회 / 주로 참석하는 학회를 한 섹션에 */
-  function activityHTML(r) {
-    if (!r.societies.length && !r.conferences.length) return "";
-    var rows = "";
-    if (r.societies.length) {
-      rows += '<div class="pf-row"><span class="pf-row__label">소사이어티 · 연구회</span>' +
-        '<div class="pf-row__body">' + chips(r.societies, "soc") + "</div></div>";
-    }
-    if (r.conferences.length) {
-      rows += '<div class="pf-row"><span class="pf-row__label">주로 참석하는 학회</span>' +
-        '<div class="pf-row__body">' + chips(r.conferences, null, true) + "</div></div>";
-    }
-    return section("학회 활동", rows);
   }
 
   function render(r, all) {
@@ -127,15 +102,14 @@
     root.innerHTML =
       '<div class="pf-aside">' +
         headHTML(r) +
-        '<div class="pf-kwsec">' + section("연구 키워드", kwHTML(r)) + "</div>" +
-        '<div class="pf-actsec">' + activityHTML(r) + "</div>" +
+        '<div class="pf-kwsec">' + section("연구 키워드", chips(r.keywords, "kw")) + "</div>" +
+        section("소사이어티 · 연구회", chips(r.societies, "soc")) +
       "</div>" +
       '<div class="pf-main">' +
         section("주요 경력", bullets(r.career)) +
-        section("대표 논문 및 수행과제", bullets(r.achievements)) +
-        section("연구목표", bullets(r.goals)) +
-        section("연구내용", researchHTML(r)) +
-        section("공동연구 희망분야", bullets(r.collaboration)) +
+        section("대표 논문", bullets(r.papers)) +
+        section("수행과제", bullets(r.projects)) +
+        section("연구목표 및 내용", researchHTML(r)) +
         '<div class="pf-printfoot print-only">' +
           "<span>한국정보과학회 신진연구자 프로필</span>" +
           "<span>" + K.escape(r.name) + " · " + K.escape(r.affilFull) + "</span>" +

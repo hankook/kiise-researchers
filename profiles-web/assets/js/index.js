@@ -119,9 +119,9 @@
     el.soc.hidden = keys.length === 0;
   }
 
-  /* 카드 요약문은 '한마디'를 우선 사용 */
+  /* 카드 요약문은 '인사말'을 우선 사용 */
   function summaryOf(r) {
-    return (r.message || r.goals[0] || r.research.body[0] || r.career[0] || "");
+    return (r.message || r.research[0] || r.career[0] || "");
   }
 
   function cardHTML(r, ts) {

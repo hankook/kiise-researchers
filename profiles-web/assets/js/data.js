@@ -23,24 +23,19 @@
     var o = Object.assign({}, r);
     o.keywords = o.keywords || [];
     o.societies = o.societies || [];        /* 정보과학회 내 소사이어티·연구회 */
-    o.conferences = o.conferences || [];    /* 주로 참석하는 학회 */
     o.career = o.career || [];              /* 주요 경력 */
-    o.achievements = o.achievements || [];  /* 대표 논문 및 수행과제 */
-    o.goals = o.goals || [];
-    o.collaboration = o.collaboration || [];
-    o.message = o.message || "";            /* 한마디 */
+    o.papers = o.papers || [];              /* 대표 논문 */
+    o.projects = o.projects || [];          /* 수행과제 */
+    o.research = o.research || [];          /* 연구목표 및 내용 */
+    o.message = o.message || "";            /* 인사말 */
     o.links = o.links || [];
-    o.research = o.research || {};
-    o.research.body = o.research.body || [];
-    o.research.figures = o.research.figures || [];
     o.affilFull = [o.affiliation, o.department].filter(Boolean).join(" ");
     o.posLine = [o.affilFull, o.position].filter(Boolean).join(" ");
     o.searchText = KIISE.fold(
       [
         o.name, o.nameEn, o.affiliation, o.department, o.position, o.degree,
-        o.keywords.join(" "), o.societies.join(" "), o.conferences.join(" "),
-        o.message, o.career.join(" "), o.achievements.join(" "), o.goals.join(" "),
-        o.research.body.join(" "), o.collaboration.join(" ")
+        o.keywords.join(" "), o.societies.join(" "), o.message,
+        o.career.join(" "), o.papers.join(" "), o.projects.join(" "), o.research.join(" ")
       ].join(" ")
     );
     o.chosung = KIISE.chosung(String(o.name || "") + " " + (o.keywords || []).join(" "));

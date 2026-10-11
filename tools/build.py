@@ -16,7 +16,7 @@
       아래 FORM 정의 + data/societies.json → assets/profile-form.xlsx (교수님용 등록 양식)
 
   python3 tools/build.py check [--strict]
-      필수 항목, id 중복·형식, 연구 키워드 개수, 한마디 길이, 소사이어티 표기,
+      필수 항목, id 중복·형식, 키워드·논문·과제·연구내용 개수, 인사말 길이, 소사이어티 표기,
       사진·그림 파일, 등록 양식 최신 여부를 점검합니다. --strict 면 문제가 있을 때 종료 코드 1.
 """
 import csv
@@ -44,44 +44,44 @@ KST = timezone(timedelta(hours=9))
 SUBMIT_EMAIL = "example@kiise.or.kr"
 
 KEYWORDS_MIN, KEYWORDS_MAX = 3, 5   # 연구 키워드 개수
+MAX_ITEMS = 5        # 대표 논문 · 수행과제 · 연구목표 및 내용 최대 개수
+MESSAGE_MAX = 120    # 인사말 글자 수
 PHOTO_SIZE = 1000    # 사진 긴 변 최대 px
 FIGURE_SIZE = 1600   # 연구내용 그림 긴 변 최대 px
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 
-# 등록 양식(세로형). 양식 생성과 읽기가 모두 이 정의를 씁니다.
-#   (키, A열 항목 이름, 입력 칸 수, C열 안내)
-# 항목은 A열 이름으로 찾으므로, 이름을 바꾸면 이미 나간 양식은 그 항목을 못 읽습니다.
+# 등록 양식(세로형). 양식 생성 · 읽기 · 필수 항목 검사가 모두 이 정의를 씁니다.
+#   (키, 항목 이름, 구분, 입력 칸 수, 안내)   구분: 필수 / 선택 / 담당자
+# 항목은 이름으로 찾으므로, 이름을 바꾸면 이미 나간 양식은 그 항목을 못 읽습니다.
 FORM = [
-    ("name",          "성명(국문)",            1, "예) 김정보"),
-    ("nameEn",        "성명(영문)",            1, "예) Jeongbo Kim — 프로필 주소를 만드는 데 쓰입니다"),
-    ("affiliation",   "소속 기관",             1, "예) ○○대학교"),
-    ("department",    "소속 학과/학부",         1, "예) 컴퓨터공학과"),
-    ("position",      "직위",                 1, "목록에서 고르거나 직접 입력"),
-    ("degree",        "최종 학위",             1, "예) ○○대학교 공학박사 (인공지능)"),
-    ("appointedAt",   "최초 임용일",           1, "예) 2024-03"),
-    ("email",         "E-mail",              1, "프로필에 공개되는 연락처. 나중에 수정 양식을 보내실 때도 같은 주소로 적어 주세요"),
-    ("homepage",      "연구실 홈페이지",        1, "선택 — 없으면 비워 두세요"),
-    ("links",         "추가 링크",             3, "선택 — 칸 하나에 하나, 라벨|주소  예) Google Scholar|https://scholar.google.com/…"),
-    ("keywords",      "연구 키워드",           1, "쉼표로 구분, %d~%d개  예) 기계학습, 표현학습, 멀티모달" % (KEYWORDS_MIN, KEYWORDS_MAX)),
-    ("societies",     "소사이어티·연구회",      1, "정보과학회 내 소속. '소사이어티 목록' 시트의 이름 그대로, 쉼표로 구분"),
-    ("conferences",   "주로 참석하는 학회",     1, "쉼표로 구분  예) NeurIPS, ICML, 한국소프트웨어종합학술대회(KSC)"),
-    ("message",       "한마디",               1, "선택 — 120자 이내, 동료 연구자들께 전하고 싶은 한 문장"),
-    ("career",        "주요 경력",             5, "이력 중심 — 현 직위, 이전 소속, 학위 등. 칸 하나에 하나, 모자라면 아래에 행 삽입"),
-    ("achievements",  "대표 논문 및 수행과제",   5, "실적 중심 — 주저자 논문, 수행 과제, 특허, 수상 등"),
-    ("goals",         "연구목표",              3, "칸 하나에 목표 하나"),
-    ("research",      "연구내용",              3, "칸 하나가 한 문단"),
-    ("collaboration", "공동연구 희망분야",      3, "협력 가능한 분야·데이터·기술"),
-    ("photo",         "사진 파일명",           1, "메일에 첨부한 사진의 파일 이름  예) kim.jpg — 세로 3:4, JPG·PNG"),
-    ("figure1",       "그림1 파일명",          1, "선택 — 연구내용 그림(가로형 권장)을 첨부했다면 파일 이름"),
-    ("caption1",      "그림1 설명",            1, "선택"),
-    ("figure2",       "그림2 파일명",          1, "선택 — 그림이 많으면 A4 한 면을 넘습니다. 최대 2장"),
-    ("caption2",      "그림2 설명",            1, "선택"),
-    ("consent",       "공개 동의",             1, "위 내용을 신진연구자 브로셔에 공개하는 데 동의하시면 '동의'라고 적어 주세요"),
-    ("id",            "프로필 id",             1, "담당자용 — 비워 두세요"),
+    ("name",        "성명(국문)",        "필수", 1, "예) 김정보"),
+    ("nameEn",      "성명(영문)",        "필수", 1, "예) Jeongbo Kim — 프로필 주소를 만드는 데 쓰입니다"),
+    ("affiliation", "소속 기관",         "필수", 1, "예) ○○대학교"),
+    ("department",  "소속 학과/학부",     "선택", 1, "예) 컴퓨터공학과"),
+    ("position",    "직위",             "필수", 1, "목록에서 고르거나 직접 입력"),
+    ("degree",      "최종 학위",         "필수", 1, "예) ○○대학교 공학박사 (인공지능)"),
+    ("appointedAt", "최초 임용일",       "필수", 1, "예) 2024-03"),
+    ("email",       "E-mail",          "필수", 1, "프로필에 공개되는 연락처. 수정 양식을 보내실 때도 같은 주소로 적어 주세요"),
+    ("homepage",    "연구실 홈페이지",    "선택", 1, ""),
+    ("links",       "추가 링크",         "선택", 3, "칸 하나에 하나, 라벨|주소  예) Google Scholar|https://scholar.google.com/…"),
+    ("keywords",    "연구 키워드",       "필수", 1, "쉼표로 구분, %d~%d개  예) 기계학습, 표현학습, 멀티모달" % (KEYWORDS_MIN, KEYWORDS_MAX)),
+    ("societies",   "소사이어티·연구회",  "선택", 1, "정보과학회 내 소속. '소사이어티 목록' 시트의 이름 그대로, 쉼표로 구분"),
+    ("message",     "인사말",           "선택", 1, "동료 연구자들께 전하는 인사, %d자 이내" % MESSAGE_MAX),
+    ("career",      "주요 경력",         "필수", 5, "현 직위, 이전 소속, 학위 등. 칸 하나에 하나, 모자라면 아래에 행 삽입"),
+    ("papers",      "대표 논문",         "선택", MAX_ITEMS, "칸 하나에 한 편, 최대 %d편" % MAX_ITEMS),
+    ("projects",    "수행과제",          "선택", MAX_ITEMS, "칸 하나에 한 건, 최대 %d건" % MAX_ITEMS),
+    ("research",    "연구목표 및 내용",   "필수", MAX_ITEMS, "칸 하나에 한 문단, 최대 %d개" % MAX_ITEMS),
+    ("photo",       "사진 파일명",       "필수", 1, "메일에 첨부한 사진의 파일 이름  예) kim.jpg — 세로 3:4, JPG·PNG"),
+    ("figure",      "그림 파일명",       "선택", 1, "연구내용 그림 1장(가로형 권장)을 첨부했다면 그 파일 이름"),
+    ("caption",     "그림 설명",         "선택", 1, "그림 아래에 붙는 한 줄 설명"),
+    ("consent",     "공개 동의",         "필수", 1, "위 내용을 신진연구자 브로셔에 공개하는 데 동의하시면 '동의'라고 적어 주세요"),
+    ("id",          "프로필 id",         "담당자", 1, "담당자용 — 비워 두세요"),
 ]
+LABEL_OF = {key: label for key, label, _, _, _ in FORM}
+REQUIRED = [key for key, _, need, _, _ in FORM if need == "필수"]
 POSITIONS = ["조교수", "부교수", "교수", "연구교수", "선임연구원", "책임연구원"]
-FORM_NOTE = ("노란 칸(B열)에 입력해 주세요. 여러 줄 항목은 칸 하나에 하나씩 쓰고, 칸이 모자라면 바로 아래에 행을 삽입하세요.\n"
-             "작성한 이 파일과 사진(그림)을 소속 기관 메일로 %s 에 보내 주세요.")
+FORM_NOTE = ("노란 칸(C열)에 입력해 주세요. '필수' 항목은 꼭 채워 주시고, '선택' 항목은 비워 두셔도 됩니다.\n"
+             "여러 줄 항목은 칸 하나에 하나씩 적어 주세요. 작성한 이 파일과 사진(그림)을 소속 기관 메일로 %s 에 보내 주세요.")
 
 TABLE_EXT = {".xlsx", ".csv"}
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"}
@@ -169,8 +169,7 @@ def is_local(path):
 
 
 def local_paths(rec):
-    figs = (rec.get("research") or {}).get("figures") or []
-    return [p for p in [rec.get("photo")] + [f.get("src") for f in figs] if is_local(p)]
+    return [p for p in (rec.get("photo"), (rec.get("figure") or {}).get("src")) if is_local(p)]
 
 
 def load_data():
@@ -212,21 +211,24 @@ def decode(raw):
 def render_form():
     S = xlsx
     rows = [
-        [("한국정보과학회 신진연구자 프로필 등록 양식", S.TITLE), ("", S.TITLE), ("", S.TITLE)],
-        [(FORM_NOTE % SUBMIT_EMAIL, S.HINT), ("", S.HINT), ("", S.HINT)],
-        [("항목", S.HEADER), ("내용 (이 열에 입력)", S.HEADER), ("안내", S.HEADER)],
+        [("한국정보과학회 신진연구자 프로필 등록 양식", S.TITLE)] + [("", S.TITLE)] * 3,
+        [(FORM_NOTE % SUBMIT_EMAIL, S.HINT)] + [("", S.HINT)] * 3,
+        [("구분", S.HEADER), ("항목", S.HEADER), ("내용 (이 열에 입력)", S.HEADER), ("안내", S.HEADER)],
     ]
     validations = []
-    for key, label, n, hint in FORM:
+    for key, label, need, n, hint in FORM:
         first_row = len(rows) + 1
+        mark = S.REQUIRED if need == "필수" else S.OPTIONAL
         for i in range(n):
-            rows.append([(label if i == 0 else "", S.LABEL), ("", S.INPUT), (hint if i == 0 else "", S.HINT)])
+            top = i == 0
+            rows.append([(need if top else "", mark), (label if top else "", S.LABEL),
+                         ("", S.INPUT), (hint if top else "", S.HINT)])
         if key == "position":
-            validations.append(("B%d" % first_row, POSITIONS))
+            validations.append(("C%d" % first_row, POSITIONS))
         elif key == "consent":
-            validations.append(("B%d" % first_row, ["동의"]))
-    profile = S.sheet_xml(rows, [20, 60, 52], merges=["A1:C1", "A2:C2"], validations=validations,
-                          freeze_rows=3, row_heights={1: 28, 2: 48})
+            validations.append(("C%d" % first_row, ["동의"]))
+    profile = S.sheet_xml(rows, [7, 18, 60, 50], merges=["A1:D1", "A2:D2"], validations=validations,
+                          freeze_rows=3, row_heights={1: 28, 2: 48}, input_col="C")
 
     societies, sigs = society_lists()
     soc_rows = [[("소사이어티", S.HEADER), ("연구회", S.HEADER)]]
@@ -246,22 +248,20 @@ def cmd_sync():
 
 # ----------------------------------------------------------------- 점검 규칙
 def record_problems(r, official):
-    """레코드 한 건의 문제 목록. check 와 ingest 가 같은 기준을 씁니다."""
-    p = []
-    for field, label in [("name", "성명(국문)"), ("affiliation", "소속 기관"), ("position", "직위")]:
-        if not r.get(field):
-            p.append(label + " 없음")
+    """레코드 한 건의 문제 목록. check 와 ingest 가 같은 기준을 씁니다.
+    (사진 첨부와 공개 동의는 양식을 읽을 때만 확인)"""
+    p = [LABEL_OF[k] + " 없음" for k in REQUIRED if k not in ("photo", "consent") and not r.get(k)]
     kw = r.get("keywords") or []
-    if not kw:
-        p.append("연구 키워드 없음")
-    elif not KEYWORDS_MIN <= len(kw) <= KEYWORDS_MAX:
-        p.append("연구 키워드 %d개 (%d~%d개 필요)" % (len(kw), KEYWORDS_MIN, KEYWORDS_MAX))
+    if kw and not KEYWORDS_MIN <= len(kw) <= KEYWORDS_MAX:
+        p.append("연구 키워드 %d개 (%d~%d개)" % (len(kw), KEYWORDS_MIN, KEYWORDS_MAX))
+    for k in ("papers", "projects", "research"):
+        n = len(r.get(k) or [])
+        if n > MAX_ITEMS:
+            p.append("%s %d개 (최대 %d개)" % (LABEL_OF[k], n, MAX_ITEMS))
     if official:
-        for soc in r.get("societies", []):
-            if soc not in official:
-                p.append("공식 목록에 없는 소사이어티·연구회: " + soc)
-    if len(r.get("message", "")) > 120:
-        p.append("한마디 %d자 (120자 이내)" % len(r["message"]))
+        p.extend("공식 목록에 없는 소사이어티·연구회: " + soc for soc in r.get("societies", []) if soc not in official)
+    if len(r.get("message", "")) > MESSAGE_MAX:
+        p.append("인사말 %d자 (%d자 이내)" % (len(r["message"]), MESSAGE_MAX))
     return p
 
 
@@ -292,9 +292,9 @@ def cmd_check(strict=False):
         photo = r.get("photo")
         if photo and not os.path.exists(os.path.join(ROOT, photo)):
             problems.append("%s: 사진 파일 없음 → %s" % (who, photo))
-        for f_ in r.get("research", {}).get("figures", []):
-            if not os.path.exists(os.path.join(ROOT, f_.get("src", ""))):
-                problems.append("%s: 그림 파일 없음 → %s" % (who, f_.get("src")))
+        fig = (r.get("figure") or {}).get("src")
+        if fig and not os.path.exists(os.path.join(ROOT, fig)):
+            problems.append("%s: 그림 파일 없음 → %s" % (who, fig))
 
     log("총 %d명 점검" % len(data))
     if problems:
@@ -314,8 +314,7 @@ def norm_label(s):
     return re.sub(r"[\W_]+", "", str(s)).lower()
 
 
-LABELS = {norm_label(label): key for key, label, _, _ in FORM}
-LABEL_OF = {key: label for key, label, _, _ in FORM}
+LABELS = {norm_label(label): key for key, label, _, _, _ in FORM}
 
 
 def read_table(path):
@@ -326,12 +325,15 @@ def read_table(path):
 
 
 def parse_form(rows):
-    """세로형 양식 → {키: [B열 값, ...]}. A열이 빈 행은 바로 위 항목에 이어 붙습니다.
-    항목 이름이 거의 없으면 양식이 아니라고 보고 None."""
+    """세로형 양식 → {키: [값, ...]}. 항목 이름이 있는 열을 찾아 바로 오른쪽 칸을 값으로 읽고,
+    항목 칸이 빈 행은 바로 위 항목에 이어 붙입니다. 항목 이름이 거의 없으면 양식이 아니라고 보고 None."""
+    col = next((i for row in rows for i, c in enumerate(row) if norm_label(c) in LABELS), None)
+    if col is None:
+        return None
     values, current, found = {}, None, 0
     for row in rows:
-        a = str(row[0]).strip() if row else ""
-        b = str(row[1]).strip() if len(row) > 1 else ""
+        a = str(row[col]).strip() if len(row) > col else ""
+        b = str(row[col + 1]).strip() if len(row) > col + 1 else ""
         if a:
             current = LABELS.get(norm_label(a))
             found += current is not None
@@ -365,12 +367,11 @@ def form_to_record(v, rid, today):
         "message": re.sub(r"\s+", " ", first(v, "message")),
         "keywords": split_keywords(",".join(v.get("keywords", []))),
         "societies": split_keywords(",".join(v.get("societies", []))),
-        "conferences": split_keywords(",".join(v.get("conferences", []))),
         "career": every("career"),
-        "achievements": every("achievements"),
-        "goals": every("goals"),
-        "research": {"body": every("research"), "figures": []},
-        "collaboration": every("collaboration"),
+        "papers": every("papers"),
+        "projects": every("projects"),
+        "research": every("research"),
+        "figure": None,
         "visible": True,
         "updatedAt": today,
     }
@@ -396,7 +397,7 @@ def pillow():
     return _PIL[0]
 
 
-def plan_image(src, kind, rid, index=0):
+def plan_image(src, kind, rid):
     """저장할 경로(photos/… , figures/…)와 오류. 이미지는 실제로 열어 확인합니다."""
     ext = os.path.splitext(src)[1].lower()
     Image = pillow()
@@ -414,9 +415,7 @@ def plan_image(src, kind, rid, index=0):
         if os.path.getsize(src) > 3 * 1024 * 1024:
             return None, "Pillow 가 없어 3MB 넘는 이미지를 줄일 수 없습니다 (GitHub Actions 에서는 자동 설치됨)"
         out_ext = ".jpg" if ext == ".jpeg" else ext
-    if kind == "photo":
-        return "photos/%s%s" % (rid, out_ext), None
-    return "figures/%s-%d%s" % (rid, index, out_ext), None
+    return "%s/%s%s" % ("photos" if kind == "photo" else "figures", rid, out_ext), None
 
 
 def save_image(src, dest, kind):
@@ -443,13 +442,12 @@ def save_image(src, dest, kind):
 
 
 def match_images(people, images, errors, rel):
-    """양식의 '사진 파일명'·'그림1/2 파일명'으로 이미지를 짝짓습니다.
+    """양식의 '사진 파일명'·'그림 파일명'으로 이미지를 짝짓습니다.
 
-    사진: 적힌 파일이 없거나 칸이 비어 있으면, 같은 폴더에 양식이 그것 하나뿐이고 남은 이미지도 하나면
-          그것을 사진으로 봅니다. 그래도 사진이 없을 때 이미 게시된 프로필이면 기존 사진을 유지합니다
-          (예전 양식을 고쳐 보내면서 사진은 다시 첨부하지 않은 경우). 처음 등록인데 적힌 파일이 없으면 오류.
-    그림: 자리(1·2)별로 같은 규칙. 적힌 파일이 없으면 그 자리의 기존 그림을 유지하고, 없으면 오류.
-          그림은 이름 없이 자동으로 짝짓지 않습니다."""
+    사진(필수): 적힌 파일이 없거나 칸이 비어 있으면, 같은 폴더에 양식이 그것 하나뿐이고 남은 이미지도
+          하나면 그것을 사진으로 봅니다. 그래도 없을 때 이미 게시된 프로필이면 기존 사진을 유지하고
+          (예전 양식을 고쳐 보내면서 사진은 다시 첨부하지 않은 경우), 처음 등록이면 오류입니다.
+    그림(선택): 적힌 파일이 없으면 기존 그림을 유지하고, 기존 그림도 없으면 오류. 자동으로 짝짓지 않습니다."""
     claimed = {}
 
     def find(p, name):
@@ -463,9 +461,8 @@ def match_images(people, images, errors, rel):
 
     for p in people:
         old = p["old"] or {}
-        old_figs = (old.get("research") or {}).get("figures") or []
-        p["photo_src"], p["photo_named"], p["figure_src"], p["keep_figure"] = None, "", {}, {}
-        for key in ("photo", "figure1", "figure2"):
+        p["photo_src"], p["photo_named"], p["figure_src"], p["keep_figure"] = None, "", None, ""
+        for key in ("photo", "figure"):
             name = first(p["values"], key)
             if not name:
                 continue
@@ -477,14 +474,12 @@ def match_images(people, images, errors, rel):
                 claimed[hit] = p
             if key == "photo":
                 p["photo_named"], p["photo_src"] = name, hit
-                continue
-            k = int(key[-1])
-            if hit:
-                p["figure_src"][k] = hit
-            elif len(old_figs) >= k:
-                p["keep_figure"][k] = name
+            elif hit:
+                p["figure_src"] = hit
+            elif is_local((old.get("figure") or {}).get("src")):
+                p["keep_figure"] = name
             else:
-                errors.append((rel(p["file"]), "%s '%s' 에 해당하는 파일이 같은 폴더에 없습니다" % (LABEL_OF[key], name)))
+                errors.append((rel(p["file"]), "그림 파일명 '%s' 에 해당하는 파일이 같은 폴더에 없습니다" % name))
 
     for p in people:
         if p["photo_src"]:
@@ -503,8 +498,9 @@ def match_images(people, images, errors, rel):
                            % (len(rest), ", ".join(os.path.basename(i) for i in rest))))
             for i in rest:
                 claimed[i] = p
-        elif p["photo_named"] and not is_local((p["old"] or {}).get("photo")):
-            errors.append((rel(p["file"]), "사진 파일명 '%s' 에 해당하는 파일이 같은 폴더에 없습니다" % p["photo_named"]))
+        elif not is_local((p["old"] or {}).get("photo")):
+            errors.append((rel(p["file"]), "사진 파일명 '%s' 에 해당하는 파일이 같은 폴더에 없습니다" % p["photo_named"]
+                           if p["photo_named"] else "사진이 없습니다. 사진을 첨부해 달라고 요청하세요"))
 
     for i in images:
         if i not in claimed:
@@ -586,7 +582,7 @@ def cmd_ingest(dry_run=False, message_file=None):
             errors.append((rel(t), "파일을 읽지 못했습니다 (%s)" % e))
             continue
         if values is None:
-            errors.append((rel(t), "신진연구자 등록 양식이 아닙니다. A열에 '성명(국문)' 같은 항목 이름이 있는 양식으로 보내 달라고 요청하세요"))
+            errors.append((rel(t), "신진연구자 등록 양식이 아닙니다. '성명(국문)' 같은 항목 이름이 있는 양식으로 보내 달라고 요청하세요"))
             continue
         email = first(values, "email").lower()
         given = first(values, "id")
@@ -605,10 +601,6 @@ def cmd_ingest(dry_run=False, message_file=None):
                 rid = slugify(first(values, "nameEn"), taken)
         rec = form_to_record(values, rid, today)
         probs = record_problems(rec, official)
-        if not rec["nameEn"]:
-            probs.append("성명(영문) 없음")
-        if not rec["email"]:
-            probs.append("E-mail 없음")
         consent = first(values, "consent")
         if "동의" not in consent or "않" in consent or "비동의" in consent:
             probs.append("'공개 동의' 칸에 '동의'가 없습니다")
@@ -637,34 +629,23 @@ def cmd_ingest(dry_run=False, message_file=None):
             rec["photo"] = old["photo"]
             p["notes"].append("사진 파일('%s')이 없어 기존 사진 유지" % p["photo_named"] if p["photo_named"]
                               else "사진은 기존 것 유지")
-        else:
-            p["notes"].append("사진 없음 — 이름 첫 글자로 표시")
-        old_figs = ((old or {}).get("research") or {}).get("figures") or []
-        if any(first(p["values"], "figure%d" % k) for k in (1, 2)):
-            for k in (1, 2):
-                caption = first(p["values"], "caption%d" % k)
-                if k in p["figure_src"]:
-                    src = p["figure_src"][k]
-                    dest, err = plan_image(src, "figure", p["id"], k)
-                    if err:
-                        errors.append((rel(src), err))
-                        continue
-                    rec["research"]["figures"].append({"src": dest, "caption": caption})
-                    jobs.append((src, dest, "figure"))
-                elif k in p["keep_figure"]:
-                    fig = dict(old_figs[k - 1])
-                    if caption:
-                        fig["caption"] = caption
-                    rec["research"]["figures"].append(fig)
-                    p["notes"].append("그림%d 파일('%s')이 없어 기존 그림 유지" % (k, p["keep_figure"][k]))
-        elif old:
-            rec["research"]["figures"] = old_figs
-        if old:
-            if old.get("visible") is False:
-                rec["visible"] = False
-                p["notes"].append("비공개 상태라 계속 비공개 (공개하려면 요청 txt 에 '공개 %s')" % p["id"])
-            for k, val in old.items():   # 양식에 없는 필드는 그대로 둠
-                rec.setdefault(k, val)
+        old_fig = (old or {}).get("figure")
+        caption = first(p["values"], "caption")
+        if p["figure_src"]:
+            dest, err = plan_image(p["figure_src"], "figure", p["id"])
+            if err:
+                errors.append((rel(p["figure_src"]), err))
+            else:
+                rec["figure"] = {"src": dest, "caption": caption}
+                jobs.append((p["figure_src"], dest, "figure"))
+        elif p["keep_figure"]:
+            rec["figure"] = dict(old_fig, caption=caption or old_fig.get("caption", ""))
+            p["notes"].append("그림 파일('%s')이 없어 기존 그림 유지" % p["keep_figure"])
+        elif old and not first(p["values"], "figure"):
+            rec["figure"] = old_fig     # 양식에 그림이 없으면 기존 그림 유지
+        if old and old.get("visible") is False:
+            rec["visible"] = False
+            p["notes"].append("비공개 상태라 계속 비공개 (공개하려면 요청 txt 에 '공개 %s')" % p["id"])
 
     # 3) 새 데이터 만들기 (아직 파일에는 쓰지 않음)
     new = list(data)
