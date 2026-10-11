@@ -386,5 +386,53 @@
     ],
     "visible": true,
     "updatedAt": "2026-09-10"
+  },
+  {
+    "id": "hankook-lee",
+    "name": "이한국",
+    "nameEn": "Hankook Lee",
+    "affiliation": "성균관대학교",
+    "department": "컴퓨터공학과",
+    "position": "조교수",
+    "photo": "photos/hankook-lee.jpg",
+    "degree": "KAIST 공학박사 (인공지능)",
+    "appointedAt": "2024-03",
+    "email": "hankook.lee@skku.edu",
+    "homepage": "https://ell.skku.edu",
+    "links": [
+      {
+        "label": "Google Scholar",
+        "url": "https://scholar.google.com/citations?user=CgqswXUAAAAJ"
+      }
+    ],
+    "message": "",
+    "keywords": [
+      "Machine Learning",
+      "Artificial Intelligence",
+      "Multi-Modal AI",
+      "Foundaion Models",
+      "Efficient Learning"
+    ],
+    "societies": [],
+    "conferences": [],
+    "career": [
+      "성균관대학교 컴퓨터공학과 조교수 (2024.03 ~ 현재)",
+      "LG AI 연구원 (2023.02 ~ 2024.02)"
+    ],
+    "achievements": [
+      "Is Prompt Selection Necessary for Task-Free Online Continual Learning? (CVPRF 2026)",
+      "ReTabAD: A Benchmark for Restoring Semantic Context in Tabular Anomaly Detection (ICLR 2026)",
+      "TimePerceiver: An Encoder-Decoder Framework for Generalized Time-Series Forecasting (NeurIPS 2025)"
+    ],
+    "goals": [
+      "데이터 효율적인 학습 알고리즘 개발"
+    ],
+    "research": {
+      "body": [],
+      "figures": []
+    },
+    "collaboration": [],
+    "visible": true,
+    "updatedAt": "2026-10-11"
   }
 ]
