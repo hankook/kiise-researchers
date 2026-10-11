@@ -3,76 +3,6 @@
    file:// 로 페이지를 직접 열었을 때(fetch 불가) 사용되는 폴백 데이터입니다. */
 window.RESEARCHERS = [
   {
-    "id": "kim-jeongbo",
-    "name": "김정보",
-    "nameEn": "Jeongbo Kim",
-    "affiliation": "가상대학교",
-    "department": "컴퓨터공학과",
-    "position": "조교수",
-    "photo": "",
-    "degree": "가상대학교 공학박사 (인공지능)",
-    "appointedAt": "2024-03",
-    "email": "jbkim@example.ac.kr",
-    "homepage": "https://example.ac.kr/~jbkim",
-    "links": [
-      {
-        "label": "Google Scholar",
-        "url": "https://scholar.google.com/"
-      },
-      {
-        "label": "Lab",
-        "url": "https://example.ac.kr/~jbkim/lab"
-      }
-    ],
-    "message": "레이블이 부족한 현실의 문제에서도 통하는 학습 방법을 찾고 있습니다. 데이터는 있는데 정답이 없다면 언제든 연락 주세요.",
-    "keywords": [
-      "기계학습",
-      "표현학습",
-      "자기지도학습",
-      "멀티모달",
-      "신뢰가능 AI"
-    ],
-    "societies": [
-      "인공지능 소사이어티",
-      "컴퓨터비전 및 패턴인식 연구회"
-    ],
-    "conferences": [
-      "NeurIPS",
-      "ICML",
-      "CVPR",
-      "한국소프트웨어종합학술대회(KSC)"
-    ],
-    "career": [
-      "가상대학교 컴퓨터공학과 조교수 (2024.03 ~ 현재)",
-      "○○연구소 Research Scientist (2021.09 ~ 2024.02)",
-      "가상대학교 공학박사 (2021.08)"
-    ],
-    "achievements": [
-      "주저자 논문: NeurIPS 3편, ICML 2편, CVPR 2편 (2021 ~ 2026)",
-      "한국연구재단 우수신진연구 과제 책임 (2024 ~ 2027)",
-      "산업체 공동연구 2건 — 제조 결함 검사, 의료영상 판독 보조"
-    ],
-    "goals": [
-      "적은 레이블로도 일반화되는 표현학습 방법론 정립",
-      "모달리티 간 정렬(alignment)을 통한 범용 멀티모달 백본 구축",
-      "실제 배포 환경에서 신뢰할 수 있는 예측 불확실성 정량화"
-    ],
-    "research": {
-      "body": [
-        "자기지도학습 기반의 표현학습을 중심으로, 레이블이 부족한 환경에서도 강건하게 동작하는 인식 모델을 연구합니다. 대조학습(contrastive learning)과 마스킹 기반 복원 목적함수를 결합하여 도메인 변화에 강인한 특징 공간을 학습하는 방법을 제안해 왔습니다.",
-        "최근에는 영상·언어·센서 신호를 함께 다루는 멀티모달 모델로 확장하여, 모달리티 누락 상황에서도 성능 저하가 작은 학습 기법과, 예측 신뢰도를 함께 산출하는 보정(calibration) 기법을 연구하고 있습니다."
-      ],
-      "figures": []
-    },
-    "collaboration": [
-      "의료·제조 등 레이블 확보가 어려운 도메인의 응용 과제",
-      "로보틱스·자율주행 분야의 멀티모달 센서 융합",
-      "온디바이스 추론을 위한 경량화 및 시스템 최적화 연구"
-    ],
-    "visible": true,
-    "updatedAt": "2026-09-01"
-  },
-  {
     "id": "lee-algo",
     "name": "이알고",
     "nameEn": "Algo Lee",
@@ -199,7 +129,7 @@ window.RESEARCHERS = [
       "자연어처리 분야와의 RAG 시스템 공동연구",
       "스토리지·하드웨어 가속 분야와의 시스템 최적화"
     ],
-    "visible": true,
+    "visible": false,
     "updatedAt": "2026-09-05"
   },
   {
