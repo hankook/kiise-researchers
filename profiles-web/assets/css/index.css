@@ -69,15 +69,24 @@
   letter-spacing: .02em;
   flex: 0 0 auto;
 }
+/* 브라우저 기본 화살표 대신 오른쪽 안쪽에 고정한 화살표.
+   너비는 가장 긴 선택지가 아니라 지금 고른 값에 맞춘다 (지원 브라우저에서) */
 .filters select {
-  padding: 7px 10px;
+  -webkit-appearance: none;
+  appearance: none;
+  field-sizing: content;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  padding: 7px 32px 7px 11px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: #fff;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%236b7280' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 11px center / 12px 12px;
   font: inherit;
   font-size: 13px;
   color: var(--ink-2);
+  cursor: pointer;
 }
+.filters select:hover { border-color: var(--navy-mid); }
 
 /* 키워드 토글 칩 */
 .kwfilter { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -130,7 +139,6 @@
   display: block;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
   padding: 18px;
   color: inherit;
   text-decoration: none;
@@ -148,7 +156,6 @@
 .card__top { display: flex; gap: 14px; align-items: flex-start; }
 .card__photo {
   width: 66px; height: 84px; flex: 0 0 66px;
-  border-radius: var(--radius-sm);
   object-fit: cover;
   background: var(--navy-soft);
   border: 1px solid var(--line);

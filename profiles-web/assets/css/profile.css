@@ -14,6 +14,7 @@
   margin-bottom: 16px;
 }
 .pf-toolbar__spacer { margin-left: auto; }
+#toolbar-extra { display: inline-flex; gap: 8px; }
 .pf-backlink { font-size: 13px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; }
 .pf-backlink:hover { color: var(--navy); }
 
@@ -30,9 +31,9 @@
 .pf-head {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  margin-bottom: 18px;
 }
 .pf-head__bar {
   background: var(--navy);
@@ -56,7 +57,6 @@
   margin: 0 auto 14px;
   object-fit: cover;
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
   background: var(--navy-soft);
 }
 .pf-photo--ph {
@@ -129,12 +129,10 @@
   font-size: 13.5px;
   font-weight: 700;
   letter-spacing: -.01em;
-  border-radius: 3px 3px 0 0;
 }
 .pf-sec__body {
   background: var(--surface);
   border: 1px solid var(--navy-line);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm);
   padding: 16px 18px;
   font-size: 14px;
   color: var(--ink);
@@ -196,7 +194,6 @@
     padding-top: 12px;
     margin-top: 2px;
   }
-  .pf-kwsec { margin-top: 14px; }
 }
 @media (max-width: 768px) {
   #toolbar-extra { display: none; }          /* 이전/다음 이동은 좁은 화면에서 숨김 */
@@ -242,7 +239,7 @@
   .pf-main { width: auto; }
 
   /* 헤더 — 템플릿과 동일하게 사진 + 인적사항 가로 배치 */
-  .pf-head { border: 1px solid var(--navy); border-radius: 0; box-shadow: none; }
+  .pf-head { border: 1px solid var(--navy); box-shadow: none; }
   .pf-head__bar { padding: 2mm 3mm; font-size: 7.4pt; background: var(--navy) !important; color: #fff !important; }
   .pf-head__brand { display: inline !important; }
   .pf-head__bar .pf-head__brand, .pf-head__bar .pf-updated { color: #dbe4f2 !important; }
@@ -253,7 +250,7 @@
     padding: 2.5mm;
     align-items: start;
   }
-  .pf-photo, .pf-photo--ph { width: 26mm; height: 33mm; margin: 0; border-radius: 0; font-size: 16pt;
+  .pf-photo, .pf-photo--ph { width: 26mm; height: 33mm; margin: 0; font-size: 16pt;
     grid-row: 1 / span 2; }
   .pf-nameline { text-align: left; border-bottom: 0; padding: 0 0 1.5mm; margin: 0 0 1.5mm; border-bottom: .3mm solid var(--navy-line); }
   .pf-name { font-size: 16pt; }
@@ -271,13 +268,11 @@
   .pf-sec__title {
     padding: 1mm 8mm 1mm 4mm;
     font-size: 8.8pt;
-    border-radius: 0;
     background: var(--navy) !important;
     color: #fff !important;
   }
   .pf-sec__body {
     border: .3mm solid #9aa9c4;
-    border-radius: 0;
     padding: 1.8mm 2.8mm;
     font-size: 8.3pt;
     line-height: 1.5;
@@ -304,7 +299,6 @@
   /* 연구 키워드 · 소사이어티를 나란히 (소사이어티가 없으면 키워드가 전체 폭) */
   .pf-aside { display: grid; grid-template-columns: 1fr 1fr; column-gap: 2.1mm; margin-bottom: 0; }
   .pf-aside > .pf-head { grid-column: 1 / -1; margin-bottom: 2.1mm; }
-  .pf-kwsec { margin-top: 0; }
   .pf-kwsec:last-child { grid-column: 1 / -1; }
   .pf-fig figcaption { font-size: 7.4pt; margin-top: 1mm; }
 
