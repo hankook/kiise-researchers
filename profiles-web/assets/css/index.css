@@ -197,16 +197,6 @@
 }
 .card mark { background: #fff2a8; color: inherit; padding: 0 1px; border-radius: 2px; }
 
-.empty {
-  padding: 60px 20px;
-  text-align: center;
-  color: var(--ink-3);
-  background: var(--surface);
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-}
-.empty strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 6px; }
-
 /* 모바일 */
 @media (max-width: 640px) {
   .hero { padding: 24px 0 22px; }

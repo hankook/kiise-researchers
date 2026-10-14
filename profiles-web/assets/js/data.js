@@ -54,12 +54,10 @@
 
   /* 검색어 하이라이트 (이미 escape 된 문자열에 적용) */
   KIISE.highlight = function (escaped, terms) {
-    if (!terms || !terms.length) return escaped;
+    if (!terms.length) return escaped;
     var pat = terms
-      .filter(function (t) { return t.length > 0; })
       .map(function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); })
       .join("|");
-    if (!pat) return escaped;
     return escaped.replace(new RegExp("(" + pat + ")", "gi"), "<mark>$1</mark>");
   };
 

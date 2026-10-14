@@ -144,24 +144,13 @@ def parse_links(text):
     return links
 
 
-def norm_date(text):
-    if not text:
-        return ""
-    s = str(text).strip()
-    m = re.search(r"(\d{4})\D+(\d{1,2})(?:\D+(\d{1,2}))?", s)
-    if not m:
-        return s
-    y, mo, d = m.group(1), m.group(2).zfill(2), (m.group(3) or "").zfill(2) if m.group(3) else ""
-    return "-".join([p for p in (y, mo, d) if p])
-
-
 def norm_month(text):
     """최초 임용일 → YYYY-MM. 엑셀이 날짜로 바꿔 버린 칸(일련번호 45352 등)도 되돌립니다."""
     s = str(text or "").strip()
     if re.fullmatch(r"\d{5}(\.0+)?", s):
         return (date(1899, 12, 30) + timedelta(days=int(float(s)))).strftime("%Y-%m")
-    s = norm_date(s)
-    return s[:7] if re.match(r"^\d{4}-\d{2}", s) else s
+    m = re.search(r"(\d{4})\D+(\d{1,2})", s)
+    return "%s-%s" % (m.group(1), m.group(2).zfill(2)) if m else s
 
 
 def is_local(path):

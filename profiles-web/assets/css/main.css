@@ -112,7 +112,7 @@ button { font: inherit; color: inherit; }
 @media (max-width: 560px) {
   .site-header__inner { padding: 11px 14px; gap: 8px; }
   .site-header__title { font-size: 15.5px; }
-  .site-header__nav { margin-left: auto; gap: 2px; }
+  .site-header__nav { gap: 2px; }
   .site-header__nav a { font-size: 12px; padding: 4px 7px; }
 }
 
@@ -172,6 +172,17 @@ button { font: inherit; color: inherit; }
   white-space: nowrap;
 }
 .kw--muted { background: #f3f5f9; border-color: var(--line); color: var(--ink-2); }
+
+/* ----------------------------------------------------------- 빈 결과 · 오류 안내 */
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--ink-3);
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+.empty strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 6px; }
 
 /* 인쇄 전용 요소는 화면에서 숨김 */
 .print-only { display: none; }
