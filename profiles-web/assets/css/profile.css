@@ -123,7 +123,7 @@
 .pf-sec__title {
   display: inline-block;
   margin: 0;
-  padding: 6px 22px 6px 16px;
+  padding: 6px 18px;
   background: var(--navy);
   color: #fff;
   font-size: 13.5px;
@@ -263,7 +263,7 @@
   /* 섹션 */
   .pf-sec { margin-bottom: 2.1mm; break-inside: avoid; page-break-inside: avoid; }
   .pf-sec__title {
-    padding: 1mm 8mm 1mm 4mm;
+    padding: 1mm 4mm;
     font-size: 8.8pt;
     background: var(--navy) !important;
     color: #fff !important;
