@@ -55,10 +55,7 @@
     }
     var ts = terms();
     for (var j = 0; j < ts.length; j++) {
-      var t = ts[j];
-      var hit = r.searchText.indexOf(t) !== -1;
-      if (!hit && K.isChosungQuery(t)) hit = r.chosung.indexOf(t) !== -1;
-      if (!hit) return false;
+      if (r.searchText.indexOf(ts[j]) === -1) return false;
     }
     return true;
   }

@@ -18,18 +18,10 @@
   .doc .req { color: #c00000; font-weight: 700; }
   .doc .opt { color: var(--ink-3); }
   .doc code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--navy-soft); color: var(--navy); padding: 1px 5px; border-radius: 4px; font-size: .92em; }
-  .doc ol.steps { counter-reset: step; margin: 0 0 18px; padding: 0; list-style: none; }
-  .doc ol.steps li { counter-increment: step; position: relative; padding: 0 0 14px 40px; color: var(--ink-2); }
-  .doc ol.steps li::before {
-    content: counter(step); position: absolute; left: 0; top: -1px;
-    width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: #fff;
-    font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-  }
-  .doc ol.steps li::after {
-    content: ""; position: absolute; left: 12.5px; top: 28px; bottom: 2px; width: 1px; background: var(--navy-line);
-  }
+  .doc ol.steps { list-style: decimal; margin: 0 0 18px; padding-left: 1.4em; }
+  .doc ol.steps li { padding-bottom: 12px; color: var(--ink-2); }
   .doc ol.steps li:last-child { padding-bottom: 0; }
-  .doc ol.steps li:last-child::after { display: none; }
+  .doc ol.steps li::marker { font-weight: 700; color: var(--navy-deep); }
   .doc ol.steps li b { color: var(--navy-deep); }
   .doc ol.steps li span { display: block; font-size: 12.5px; color: var(--ink-3); margin-top: 2px; }
   .note { border-left: 4px solid var(--accent); background: #f2f7ff; padding: 12px 14px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 0 0 16px; font-size: 13.5px; color: var(--ink-2); }
@@ -58,14 +50,14 @@
   <div class="note">
     양식에는 항목마다 <b class="req">필수</b> / <b class="opt">선택</b>이 표시되어 있습니다.
     여러 줄 항목은 <b>칸 하나에 한 항목씩</b> 적어 주세요. 칸 하나가 불릿 하나가 됩니다.
-    A4 한 면에 들어가도록 대표 논문 · 수행과제 · 연구목표 및 내용은 각각 <b>최대 5개</b>까지 받습니다.
+    A4 한 면에 들어가도록 대표 논문 · 수행 과제 · 연구 목표 및 내용은 각각 <b>최대 5개</b>까지 받습니다.
   </div>
 
   <h2>등록 절차</h2>
   <ol class="steps">
     <li><b>작성</b> — 위 양식을 내려받아 노란 칸(C열)을 채워 주세요.
       <span>엑셀·한셀·Numbers·구글 시트 어느 것으로 작성하셔도 됩니다. xlsx 로 저장해 주세요.</span></li>
-    <li><b>제출</b> — 작성한 양식과 <b>사진</b>(연구내용 그림이 있으면 1장 함께)을 첨부해
+    <li><b>제출</b> — 작성한 양식과 <b>사진</b>(연구 내용 그림이 있으면 1장 함께)을 첨부해
       <b>소속 기관 메일</b>로 <a href="mailto:example@kiise.or.kr">example@kiise.or.kr</a> 에 보내 주세요.
       <span>기관 메일로 보내 주시는 것이 본인 확인을 대신합니다. 양식의 '사진 파일명' 칸에 첨부한 사진 파일 이름을 적어 주세요.</span></li>
     <li><b>게시</b> — 담당 간사가 소속·직위를 학과 공식 홈페이지와 대조한 뒤 게시합니다.
@@ -98,10 +90,10 @@
       <tr><th>인사말</th><td class="opt">선택</td><td>동료 연구자들께 전하는 인사, <b>120자 이내</b><br><small>예) 데이터는 있는데 정답이 없다면 언제든 연락 주세요.</small></td></tr>
       <tr><th>주요 경력</th><td class="req">필수</td><td>현 직위, 이전 소속, 학위 등 — 칸 하나에 하나</td></tr>
       <tr><th>대표 논문</th><td class="opt">선택</td><td>칸 하나에 한 편, <b>최대 5편</b></td></tr>
-      <tr><th>수행과제</th><td class="opt">선택</td><td>칸 하나에 한 건, <b>최대 5건</b></td></tr>
-      <tr><th>연구목표 및 내용</th><td class="req">필수</td><td>칸 하나에 한 문단, <b>최대 5개</b></td></tr>
+      <tr><th>수행 과제</th><td class="opt">선택</td><td>칸 하나에 한 건, <b>최대 5건</b></td></tr>
+      <tr><th>연구 목표 및 내용</th><td class="req">필수</td><td>칸 하나에 한 문단, <b>최대 5개</b></td></tr>
       <tr><th>사진 파일명</th><td class="req">필수</td><td>메일에 첨부한 사진의 파일 이름 — 세로형 프로필 사진 (권장 3:4, 600×800px 이상, JPG·PNG)</td></tr>
-      <tr><th>그림 파일명 / 설명</th><td class="opt">선택</td><td>연구내용 그림 1장(가로형 권장)을 첨부했다면 파일 이름과 한 줄 설명</td></tr>
+      <tr><th>그림 파일명 / 설명</th><td class="opt">선택</td><td>연구 내용 그림 1장(가로형 권장)을 첨부했다면 파일 이름과 한 줄 설명</td></tr>
       <tr><th>공개 동의</th><td class="req">필수</td><td>'동의'라고 적어 주세요<br><small>· 위 내용을 신진연구자 프로필 브로셔에 공개하는 데 동의합니다.<br>· 본인이 작성한 내용이며 사실과 다른 내용이 없음을 확인합니다.</small></td></tr>
     </tbody>
   </table>

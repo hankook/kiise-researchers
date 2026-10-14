@@ -25,8 +25,8 @@
     o.societies = o.societies || [];        /* 정보과학회 내 소사이어티·연구회 */
     o.career = o.career || [];              /* 주요 경력 */
     o.papers = o.papers || [];              /* 대표 논문 */
-    o.projects = o.projects || [];          /* 수행과제 */
-    o.research = o.research || [];          /* 연구목표 및 내용 */
+    o.projects = o.projects || [];          /* 수행 과제 */
+    o.research = o.research || [];          /* 연구 목표 및 내용 */
     o.message = o.message || "";            /* 인사말 */
     o.links = o.links || [];
     o.affilFull = [o.affiliation, o.department].filter(Boolean).join(" ");
@@ -38,7 +38,6 @@
         o.career.join(" "), o.papers.join(" "), o.projects.join(" "), o.research.join(" ")
       ].join(" ")
     );
-    o.chosung = KIISE.chosung(String(o.name || "") + " " + (o.keywords || []).join(" "));
     return o;
   };
 
@@ -46,19 +45,6 @@
   KIISE.fold = function (s) {
     return String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
   };
-
-  var CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-  /* 한글 문자열의 초성 추출 — "김정보" → "ㄱㅈㅂ" (초성 검색 지원) */
-  KIISE.chosung = function (s) {
-    var out = "";
-    for (var i = 0; i < s.length; i++) {
-      var c = s.charCodeAt(i);
-      if (c >= 0xac00 && c <= 0xd7a3) out += CHO[Math.floor((c - 0xac00) / 588)];
-      else out += s[i].toLowerCase();
-    }
-    return out;
-  };
-  KIISE.isChosungQuery = function (q) { return /^[ㄱ-ㅎ\s]+$/.test(q); };
 
   KIISE.escape = function (s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (m) {

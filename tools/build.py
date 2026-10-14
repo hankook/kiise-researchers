@@ -16,7 +16,7 @@
       아래 FORM 정의 + data/societies.json → assets/profile-form.xlsx (교수님용 등록 양식)
 
   python3 tools/build.py check [--strict]
-      필수 항목, id 중복·형식, 키워드·논문·과제·연구내용 개수, 인사말 길이, 소사이어티 표기,
+      필수 항목, id 중복·형식, 키워드·논문·과제·연구 내용 개수, 인사말 길이, 소사이어티 표기,
       사진·그림 파일, 등록 양식 최신 여부를 점검합니다. --strict 면 문제가 있을 때 종료 코드 1.
 """
 import csv
@@ -44,10 +44,10 @@ KST = timezone(timedelta(hours=9))
 SUBMIT_EMAIL = "example@kiise.or.kr"
 
 KEYWORDS_MIN, KEYWORDS_MAX = 3, 5   # 연구 키워드 개수
-MAX_ITEMS = 5        # 대표 논문 · 수행과제 · 연구목표 및 내용 최대 개수
+MAX_ITEMS = 5        # 대표 논문 · 수행 과제 · 연구 목표 및 내용 최대 개수
 MESSAGE_MAX = 120    # 인사말 글자 수
 PHOTO_SIZE = 1000    # 사진 긴 변 최대 px
-FIGURE_SIZE = 1600   # 연구내용 그림 긴 변 최대 px
+FIGURE_SIZE = 1600   # 연구 내용 그림 긴 변 최대 px
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 
 # 등록 양식(세로형). 양식 생성 · 읽기 · 필수 항목 검사가 모두 이 정의를 씁니다.
@@ -69,10 +69,10 @@ FORM = [
     ("message",     "인사말",           "선택", 1, "동료 연구자들께 전하는 인사, %d자 이내" % MESSAGE_MAX),
     ("career",      "주요 경력",         "필수", 5, "현 직위, 이전 소속, 학위 등. 칸 하나에 하나, 모자라면 아래에 행 삽입"),
     ("papers",      "대표 논문",         "선택", MAX_ITEMS, "칸 하나에 한 편, 최대 %d편" % MAX_ITEMS),
-    ("projects",    "수행과제",          "선택", MAX_ITEMS, "칸 하나에 한 건, 최대 %d건" % MAX_ITEMS),
-    ("research",    "연구목표 및 내용",   "필수", MAX_ITEMS, "칸 하나에 한 문단, 최대 %d개" % MAX_ITEMS),
+    ("projects",    "수행 과제",         "선택", MAX_ITEMS, "칸 하나에 한 건, 최대 %d건" % MAX_ITEMS),
+    ("research",    "연구 목표 및 내용",  "필수", MAX_ITEMS, "칸 하나에 한 문단, 최대 %d개" % MAX_ITEMS),
     ("photo",       "사진 파일명",       "필수", 1, "메일에 첨부한 사진의 파일 이름  예) kim.jpg — 세로 3:4, JPG·PNG"),
-    ("figure",      "그림 파일명",       "선택", 1, "연구내용 그림 1장(가로형 권장)을 첨부했다면 그 파일 이름"),
+    ("figure",      "그림 파일명",       "선택", 1, "연구 내용 그림 1장(가로형 권장)을 첨부했다면 그 파일 이름"),
     ("caption",     "그림 설명",         "선택", 1, "그림 아래에 붙는 한 줄 설명"),
     ("consent",     "공개 동의",         "필수", 1, "위 내용을 신진연구자 브로셔에 공개하는 데 동의하시면 '동의'라고 적어 주세요"),
     ("id",          "프로필 id",         "담당자", 1, "담당자용 — 비워 두세요"),

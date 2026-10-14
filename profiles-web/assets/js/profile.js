@@ -108,8 +108,8 @@
       '<div class="pf-main">' +
         section("주요 경력", bullets(r.career)) +
         section("대표 논문", bullets(r.papers)) +
-        section("수행과제", bullets(r.projects)) +
-        section("연구목표 및 내용", researchHTML(r)) +
+        section("수행 과제", bullets(r.projects)) +
+        section("연구 목표 및 내용", researchHTML(r)) +
         '<div class="pf-printfoot print-only">' +
           "<span>한국정보과학회 신진연구자 프로필</span>" +
           "<span>" + K.escape(r.name) + " · " + K.escape(r.affilFull) + "</span>" +
