@@ -296,5 +296,39 @@
     "figure": null,
     "visible": true,
     "updatedAt": "2026-10-11"
+  },
+  {
+    "id": "sukmin-yun",
+    "name": "윤석민",
+    "nameEn": "Sukmin Yun",
+    "affiliation": "한양대학교",
+    "department": "인공지능융합학과",
+    "position": "조교수",
+    "photo": "photos/sukmin-yun.jpg",
+    "degree": "한국과학기술원 공학박사 (인공지능)",
+    "appointedAt": "2024-03",
+    "email": "sukminyun@hanyang.ac.kr",
+    "homepage": "https://vision.hanyang.ac.kr",
+    "links": [],
+    "message": "",
+    "keywords": [
+      "에이전틱AI",
+      "로봇AI",
+      "표현학습",
+      "멀티모달"
+    ],
+    "societies": [],
+    "career": [
+      "한양대학교 인공지능융합학과 조교수 (24.03~현재)",
+      "MBZUAI 박사후연구원 (23.02~24.02)"
+    ],
+    "papers": [],
+    "projects": [],
+    "research": [
+      "최근에는 저비트 경량 모델의 학습 비용 절감에 관심이 많습니다. 또한 robot AI와 multi-agent collaboration 연구에도 많은 관심을 가지고 있습니다."
+    ],
+    "figure": null,
+    "visible": true,
+    "updatedAt": "2026-10-20"
   }
 ]
